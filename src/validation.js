@@ -5,7 +5,8 @@ const HELP_OPTIONS = ['greet', 'food', 'tech', 'video', 'social', 'setup'];
 const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 const hasPhone = (v) => v.replace(/\D/g, '').length >= 8;
 
-// Формата има едно поле „Телефон или имейл“: сървърът решава кое е кое.
+// Формата има едно поле „Телефон или имейл“ (по желание): сървърът решава кое е кое.
+// Празно е позволено; каквото е въведено, трябва да е валиден имейл или телефон.
 const registerSchema = z.object({
   episodeId: z.coerce.number().int().min(1).max(99),
   name: z.string().trim().min(1, 'Напиши как да те наричаме.').max(100),
@@ -13,7 +14,9 @@ const registerSchema = z.object({
     .string()
     .trim()
     .max(120)
-    .refine((v) => isEmail(v) || hasPhone(v), 'Въведи телефон (поне 8 цифри) или имейл с @.'),
+    .optional()
+    .default('')
+    .refine((v) => v === '' || isEmail(v) || hasPhone(v), 'Въведи телефон (поне 8 цифри) или имейл с @.'),
   invitedBy: z.string().trim().max(100).optional().default(''),
   firstTime: z.coerce.boolean().optional().default(false),
   help: z.array(z.enum(HELP_OPTIONS)).max(HELP_OPTIONS.length).optional().default([]),

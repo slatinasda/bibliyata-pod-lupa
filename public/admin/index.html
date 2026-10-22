@@ -185,7 +185,7 @@ async function loadStats() {
     const d = await (await api('/api/admin/stats')).json();
     const items = [
       [d.registrations.total, 'Регистрации'], [d.registrations.new, 'Нови'], [d.registrations.first_time, 'За първи път'],
-      [d.registrations.invited, 'Доведени с покана'], [d.registrations.volunteers, 'Искат да помагат'], [d.contacts.new, 'Нови съобщения'],
+      [d.registrations.volunteers, 'Искат да помагат'], [d.contacts.new, 'Нови съобщения'],
     ];
     $('stats').replaceChildren(...items.map(([n, label]) => el('div', { class: 'stat' }, el('b', {}, String(n)), el('span', {}, label))));
   } catch (e) {}
@@ -214,7 +214,7 @@ async function loadRegistrations() {
   body.replaceChildren(...rows.map((r) => el('tr', { 'data-id': r.id },
     el('td', {}, fmtDate(r.created_at)),
     el('td', {}, r.name),
-    el('td', {}, r.phone || '', r.phone && r.email ? el('br') : '', r.email || ''),
+    el('td', {}, r.phone || r.email ? [r.phone || '', r.phone && r.email ? el('br') : '', r.email || ''] : '—'),
     el('td', {}, r.episode ? r.episode.id + ' · ' + r.episode.question : '#' + r.episode_id),
     el('td', {},
       r.first_time ? el('span', { class: 'tag first' }, 'За първи път') : '',

@@ -68,7 +68,7 @@ function boot(EPISODES) {
       '<div class="ep-art">' + art(i) + '</div>' + badge +
       '<div class="ep-body"><span class="ep-no">Епизод ' + pad(ep.id) + '</span>' +
       '<h3>' + ep.question + (ep.final ? '<span class="ep-final">' + ep.final + '</span>' : '') + '</h3>' +
-      '<div class="ep-foot"><span class="ep-date"><b>' + dm(ep.date) + ', събота</b>' + (ep.id === 7 ? 'Мирослав, Михаил, Стоян' : ep.host) + '</span>' + action + '</div></div></article>';
+      '<div class="ep-foot"><span class="ep-date"><b>' + dm(ep.date) + ', събота</b>' + (ep.id === 7 ? 'Мирослав Милков, Стоян Петков' : ep.host) + '</span>' + action + '</div></div></article>';
   }).join('');
 
   // Bring the next episode into view inside the row
@@ -95,7 +95,7 @@ function boot(EPISODES) {
   function syncPick() {
     var ep = EPISODES[Number(sel.value) - 1]; if (!ep) return;
     document.getElementById('pick-q').textContent = ep.question;
-    document.getElementById('pick-date').textContent = longDate(ep.date) + ', 18:00 · ул. „Добри Немиров“ 5';
+    document.getElementById('pick-date').textContent = longDate(ep.date) + ', 18:00\n ЦАСД София-Запад, ул. „Добри Немиров“ 5';
     renderInvite(ep);
   }
   sel.addEventListener('change', syncPick);
@@ -139,10 +139,10 @@ function boot(EPISODES) {
 
   // Try the cards
   var replies = {
-    yes: '<strong>Да.</strong> Интересна позиция. В залата ще видиш колко души мислят като теб, и после ще проверим какво казва текстът.',
+    yes: '<strong>Да.</strong> Интересна позиция. В залата ще видиш колко души мислят като теб.',
     no: '<strong>Не.</strong> Чудесно. Не е нужно да обясняваш защо, освен ако не искаш.',
     maybe: '<strong>Може би.</strong> Най-честата честна позиция. Точно за нея е тази вечер.',
-    comment: '<strong>Коментар.</strong> Значи имаш какво да кажеш. Водещият ще ти даде думата.'
+    comment: '<strong>Коментар.</strong> Значи имаш какво да кажеш или попиташ. Водещият ще ти даде думата.'
   };
   var votes = document.querySelectorAll('.vote');
   votes.forEach(function (v) {
@@ -160,7 +160,7 @@ function boot(EPISODES) {
     else { f.removeAttribute('data-error'); input.removeAttribute('aria-invalid'); e.hidden = true; }
     return bad;
   }
-  function contactBad(v) { v = v.trim(); return !(/^\S+@\S+\.\S+$/.test(v) || v.replace(/\D/g, '').length >= 8); }
+  function contactBad(v) { v = v.trim(); return v !== '' && !(/^\S+@\S+\.\S+$/.test(v) || v.replace(/\D/g, '').length >= 8); }
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     var n = document.getElementById('r-name'), c = document.getElementById('r-contact');
@@ -175,11 +175,11 @@ function boot(EPISODES) {
     err.hidden = true; btn.disabled = true;
     post('/api/register', {
       episodeId: ep.id, name: n.value.trim(), contact: c.value.trim(),
-      invitedBy: document.getElementById('r-who').value.trim(), firstTime: first, help: helpVals,
+      firstTime: first, help: helpVals,
       website: document.getElementById('r-web').value
     }).then(function () {
       document.getElementById('ok-title').textContent = 'Записахме те, ' + name + '.';
-      document.getElementById('ok-text').textContent = longDate(ep.date) + ', 18:00, ул. „Добри Немиров“ 5. Тема: „' + ep.question + '“.' +
+      document.getElementById('ok-text').textContent = longDate(ep.date) + ', 18:00, ЦАСД София-Запад, ул. „Добри Немиров“ 5. Тема: „' + ep.question + '“.' +
         (first ? ' Понеже идваш за първи път, на входа ще те посрещне човек от екипа.' : '') +
         (helpVals.length ? ' Благодарим, че искаш да помагаш. Ще ти пишем за това отделно.' : '');
       form.hidden = true; ok.hidden = false; ok.focus();

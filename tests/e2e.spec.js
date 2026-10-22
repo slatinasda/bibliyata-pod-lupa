@@ -24,6 +24,22 @@ test('public site loads with the season data and no console errors', async ({ pa
   await expect(page.locator('#when-topic')).not.toBeEmpty();
   await expect(page.locator('#reg-form')).toBeVisible();
   await expect(page.locator('#r-ep option').first()).toBeAttached();
+
+  // final.html: сезонът, адресът, реалните социални линкове и снимките на водещите
+  await expect(page.locator('#hero-title')).toHaveText('Такъв ли е Бог?');
+  await expect(page.locator('.site-footer')).toContainText('ЦАСД София-Запад');
+  const social = await page.locator('.social-rail a').evaluateAll((as) => as.map((a) => a.getAttribute('href')));
+  expect(social).toEqual(['https://www.facebook.com/SDAsofiawest', 'https://www.instagram.com/sdasofiawest', 'https://www.youtube.com/@SDAsofiawest']);
+  const hosts = page.locator('.host');
+  await expect(hosts).toHaveCount(3);
+  await expect(hosts.nth(0)).toContainText('Мирослав Милков');
+  await expect(hosts.nth(1)).toContainText('Стоян Петков');
+  await expect(hosts.nth(2)).toContainText('Михаил Гърков');
+  await page.locator('.host').first().scrollIntoViewIfNeeded();
+  await expect.poll(() => page.locator('.host img.ava-img').evaluateAll((is) => is.map((i) => i.complete && i.naturalWidth))).toEqual([480, 480, 480]);
+  await expect(page.locator('#r-who')).toHaveCount(0);
+  await page.locator('.hosts').screenshot({ path: `${SHOTS}/desktop-hosts.png` });
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: `${SHOTS}/desktop-top.png` });
   await page.screenshot({ path: `${SHOTS}/desktop-full.png`, fullPage: true });
   expect(errors).toEqual([]);
@@ -35,7 +51,7 @@ test('registration form validates on the client and sends nothing', async ({ pag
   await page.goto('/');
   await page.locator('#reg-form button[type=submit]').click();
   await expect(page.locator('#r-name-err')).toBeVisible();
-  await expect(page.locator('#r-contact-err')).toBeVisible();
+  await expect(page.locator('#r-contact-err')).toBeHidden(); // телефон/имейл е по желание
   await page.fill('#r-name', 'Тест');
   await page.fill('#r-contact', '123');
   await page.locator('#reg-form button[type=submit]').click();
@@ -49,7 +65,6 @@ test('registering with an email and with a phone is stored and shown in the admi
   await page.selectOption('#r-ep', '3');
   await page.fill('#r-name', 'Иван Петров');
   await page.fill('#r-contact', 'ivan@example.com');
-  await page.fill('#r-who', 'Мария');
   await page.check('#r-first');
   await page.check('#v-greet');
   await page.check('#v-tech');
@@ -70,10 +85,25 @@ test('registering with an email and with a phone is stored and shown in the admi
   const rows = await (await request.get('/api/admin/registrations', { headers: auth(token) })).json();
   expect(rows).toHaveLength(2);
   const ivan = rows.find((r) => r.name === 'Иван Петров');
-  expect(ivan).toMatchObject({ episode_id: 3, email: 'ivan@example.com', phone: '', invited_by: 'Мария', first_time: true, status: 'new' });
+  expect(ivan).toMatchObject({ episode_id: 3, email: 'ivan@example.com', phone: '', first_time: true, status: 'new' });
   expect(ivan.help.sort()).toEqual(['greet', 'tech']);
   const elena = rows.find((r) => r.name === 'Елена Георгиева');
   expect(elena).toMatchObject({ phone: '0888 123 456', email: '', first_time: false });
+});
+
+test('phone/email is optional: a name alone registers, a bad value is still rejected', async ({ page, request }) => {
+  await page.goto('/');
+  await page.fill('#r-name', 'Само Име');
+  await page.locator('#reg-form button[type=submit]').click();
+  await expect(page.locator('#reg-ok')).toBeVisible();
+  await expect(page.locator('#r-contact-err')).toBeHidden();
+
+  const token = await adminToken(request);
+  const rows = await (await request.get('/api/admin/registrations', { headers: auth(token) })).json();
+  const row = rows.find((r) => r.name === 'Само Име');
+  expect(row).toMatchObject({ phone: '', email: '' });
+  expect((await request.post('/api/register', { data: { episodeId: 1, name: 'А', contact: '123' } })).status()).toBe(400);
+  expect((await request.delete(`/api/admin/registrations/${row.id}`, { headers: auth(token) })).ok()).toBeTruthy();
 });
 
 test('contact form validates, submits and is stored', async ({ page, request }) => {
