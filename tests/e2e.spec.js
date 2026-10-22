@@ -36,7 +36,7 @@ test('public site loads with the season data and no console errors', async ({ pa
   await expect(hosts.nth(1)).toContainText('Стоян Петков');
   await expect(hosts.nth(2)).toContainText('Михаил Гърков');
   await page.locator('.host').first().scrollIntoViewIfNeeded();
-  await expect.poll(() => page.locator('.host img.ava-img').evaluateAll((is) => is.map((i) => i.complete && i.naturalWidth))).toEqual([480, 480, 480]);
+  await expect.poll(() => page.locator('.host img.ava-img').evaluateAll((is) => is.map((i) => i.complete && i.naturalWidth))).toEqual([720, 606, 720]);
   await expect(page.locator('#r-who')).toHaveCount(0);
   await page.locator('.hosts').screenshot({ path: `${SHOTS}/desktop-hosts.png` });
   await page.evaluate(() => window.scrollTo(0, 0));
