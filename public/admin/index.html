@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Админ — Библията под лупа</title>
+<meta name="robots" content="noindex, nofollow">
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif; background: #F4EDDF; color: #18261F; margin: 0; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+  h1 { font-size: 1.4rem; margin: 0; }
+  h2 { font-size: 1.1rem; margin: 1.5rem 0 1rem; }
+  .card { background: #FBF7EE; border: 1px solid #D6C9AE; padding: 1.5rem; margin-bottom: 1.5rem; border-radius: 10px; }
+  label { display: block; font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: #44514A; margin-bottom: .35rem; margin-top: .9rem; }
+  input, select { width: 100%; padding: .55rem .7rem; border: 1px solid #D6C9AE; background: #fff; font-size: .92rem; font-family: inherit; border-radius: 6px; }
+  button { cursor: pointer; border: 1px solid #143A40; background: #143A40; color: #FBF7EE; padding: .6rem 1.2rem; font-size: .82rem; text-transform: uppercase; letter-spacing: .06em; border-radius: 6px; }
+  button.secondary { background: transparent; color: #143A40; }
+  button.danger { background: #A8402F; border-color: #A8402F; color: #fff; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+  th, td { text-align: left; padding: .6rem .5rem; border-bottom: 1px solid #D6C9AE; vertical-align: top; }
+  th { font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: #44514A; }
+  .row-actions { display: flex; gap: .4rem; }
+  .row-actions button, .small { padding: .3rem .6rem; font-size: .7rem; }
+  .tag { display: inline-block; padding: .1rem .5rem; font-size: .68rem; letter-spacing: .04em; border-radius: 999px; background: #EBE1CC; margin: 0 .25rem .25rem 0; }
+  .tag.first { background: #B4501A; color: #fff; }
+  .err { color: #A8402F; font-size: .85rem; margin-top: .5rem; }
+  #app { display: none; }
+  #loginScreen { max-width: 380px; margin: 4rem auto; }
+  .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; gap: 1rem; }
+  .logout-btn { background: transparent; border: 1px solid #44514A; color: #44514A; padding: .4rem .8rem; font-size: .72rem; }
+  .tabs { display: flex; gap: .5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+  .tabs button { background: transparent; color: #143A40; border: 1px solid #D6C9AE; }
+  .tabs button.active { background: #143A40; color: #fff; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .75rem; margin-bottom: 1.25rem; }
+  .stat { background: #FBF7EE; border: 1px solid #D6C9AE; border-radius: 10px; padding: .9rem 1rem; }
+  .stat b { display: block; font-size: 1.6rem; color: #143A40; }
+  .stat span { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: #44514A; }
+  .filters { display: flex; gap: .75rem; align-items: end; flex-wrap: wrap; margin-bottom: 1rem; }
+  .filters > div { flex: 1 1 180px; }
+  .filters label { margin-top: 0; }
+  .empty { padding: 1rem .5rem; color: #44514A; }
+  .table-scroll { overflow-x: auto; }
+  td .msg { max-width: 420px; white-space: pre-wrap; overflow-wrap: anywhere; }
+</style>
+</head>
+<body>
+
+<div id="loginScreen" class="wrap">
+  <div class="card">
+    <h1>Вход в админа</h1>
+    <form id="loginForm">
+      <label for="loginEmail">Имейл</label>
+      <input id="loginEmail" type="email" autocomplete="username" required/>
+      <label for="loginPassword">Парола</label>
+      <input id="loginPassword" type="password" autocomplete="current-password" required/>
+      <label for="loginCode">Код от приложението (6 цифри)</label>
+      <input id="loginCode" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="само ако е включен двуфакторен вход"/>
+      <div style="margin-top:1.2rem;"><button id="loginBtn" type="submit">Вход</button></div>
+      <div id="loginError" class="err" role="alert"></div>
+    </form>
+  </div>
+</div>
+
+<div id="app" class="wrap">
+  <div class="top-bar">
+    <h1>Библията под лупа — админ</h1>
+    <button class="logout-btn" id="logoutBtn" type="button">Изход</button>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="tabs">
+    <button class="active" data-tab="registrations" type="button">Регистрации</button>
+    <button data-tab="contacts" type="button">Съобщения</button>
+  </div>
+
+  <div id="registrationsTab" class="tab-panel active">
+    <div class="filters">
+      <div><label for="fEpisode">Епизод</label><select id="fEpisode"><option value="">Всички</option></select></div>
+      <div><label for="fStatus">Статус</label>
+        <select id="fStatus"><option value="">Всички</option><option value="new">Нова</option><option value="contacted">С лично съобщение</option><option value="attended">Дошъл</option><option value="cancelled">Отказал</option></select></div>
+      <div style="flex:0 0 auto"><button class="secondary" id="csvBtn" type="button">Свали CSV</button></div>
+    </div>
+    <h2 style="margin-top:0">Регистрации (<span id="regCount">0</span>)</h2>
+    <div class="card table-scroll">
+      <table>
+        <thead><tr><th>Дата</th><th>Име</th><th>Контакт</th><th>Епизод</th><th>Бележки</th><th>Статус</th><th></th></tr></thead>
+        <tbody id="regBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="contactsTab" class="tab-panel">
+    <h2 style="margin-top:0">Съобщения от „Пиши ни“ (<span id="contactCount">0</span>)</h2>
+    <div class="card table-scroll">
+      <table>
+        <thead><tr><th>Дата</th><th>Име</th><th>Имейл</th><th>Съобщение</th><th>Статус</th><th></th></tr></thead>
+        <tbody id="contactsBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = ''; // същият origin; админът се сервира от същия сървър
+const HELP = { greet: 'Посрещане', food: 'Почерпка', tech: 'Звук и техника', video: 'Снимки и видео', social: 'Социални мрежи', setup: 'Подреждане на залата' };
+const REG_STATUS = { new: 'Нова', contacted: 'С лично съобщение', attended: 'Дошъл', cancelled: 'Отказал' };
+const CONTACT_STATUS = { new: 'Ново', contacted: 'Отговорено', closed: 'Приключено' };
+let token = null;
+try { token = sessionStorage.getItem('bpl_admin_token'); } catch (e) {}   // само за този таб: затваряш таба и излизаш
+
+const $ = (id) => document.getElementById(id);
+function el(tag, attrs, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === 'class') n.className = v; else if (k.startsWith('on')) n[k] = v; else n.setAttribute(k, v);
+  }
+  kids.flat().forEach((c) => n.append(c));
+  return n;
+}
+const authHeaders = () => ({ Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' });
+const fmtDate = (s) => new Date(s).toLocaleString('bg-BG', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+async function api(path, opts = {}) {
+  const res = await fetch(API + path, { ...opts, headers: { ...authHeaders(), ...(opts.headers || {}) } });
+  if (res.status === 401) { logout(); throw new Error('unauthorized'); }
+  return res;
+}
+
+$('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errEl = $('loginError');
+  errEl.textContent = '';
+  $('loginBtn').disabled = true;
+  try {
+    const res = await fetch(API + '/api/admin/login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: $('loginEmail').value, password: $('loginPassword').value, code: $('loginCode').value.trim() }),
+    });
+    const data = await res.json();
+    if (!res.ok) { errEl.textContent = data.needsCode ? 'Въведи кода от приложението.' : (data.error || 'Неуспешен вход.'); return; }
+    token = data.token;
+    try { sessionStorage.setItem('bpl_admin_token', token); } catch (e2) {}
+    showApp();
+  } catch (e2) {
+    errEl.textContent = 'Няма връзка със сървъра.';
+  } finally {
+    $('loginBtn').disabled = false;
+  }
+});
+
+function logout() {
+  token = null;
+  try { sessionStorage.removeItem('bpl_admin_token'); } catch (e) {}
+  $('app').style.display = 'none';
+  $('loginScreen').style.display = 'block';
+}
+$('logoutBtn').addEventListener('click', logout);
+
+document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => {
+  document.querySelectorAll('.tabs button').forEach((x) => x.classList.toggle('active', x === b));
+  document.querySelectorAll('.tab-panel').forEach((p) => p.classList.remove('active'));
+  $(b.dataset.tab + 'Tab').classList.add('active');
+  if (b.dataset.tab === 'contacts') loadContacts(); else loadRegistrations();
+}));
+
+async function showApp() {
+  $('loginScreen').style.display = 'none';
+  $('app').style.display = 'block';
+  try {
+    const s = await api('/api/season');
+    const { episodes } = await s.json();
+    const sel = $('fEpisode');
+    if (sel.options.length === 1) episodes.forEach((ep) => sel.append(new Option(ep.id + ' · ' + ep.question, ep.id)));
+  } catch (e) {}
+  await Promise.all([loadStats(), loadRegistrations()]);
+}
+
+async function loadStats() {
+  try {
+    const d = await (await api('/api/admin/stats')).json();
+    const items = [
+      [d.registrations.total, 'Регистрации'], [d.registrations.new, 'Нови'], [d.registrations.first_time, 'За първи път'],
+      [d.registrations.invited, 'Доведени с покана'], [d.registrations.volunteers, 'Искат да помагат'], [d.contacts.new, 'Нови съобщения'],
+    ];
+    $('stats').replaceChildren(...items.map(([n, label]) => el('div', { class: 'stat' }, el('b', {}, String(n)), el('span', {}, label))));
+  } catch (e) {}
+}
+
+function statusSelect(map, value, onChange) {
+  const s = el('select', { 'aria-label': 'Статус' });
+  Object.entries(map).forEach(([k, label]) => s.append(new Option(label, k, false, k === value)));
+  s.addEventListener('change', () => onChange(s.value));
+  return s;
+}
+
+function regQuery() {
+  const q = new URLSearchParams();
+  if ($('fEpisode').value) q.set('episode', $('fEpisode').value);
+  if ($('fStatus').value) q.set('status', $('fStatus').value);
+  const s = q.toString();
+  return '/api/admin/registrations' + (s ? '?' + s : '');
+}
+
+async function loadRegistrations() {
+  const rows = await (await api(regQuery())).json();
+  $('regCount').textContent = rows.length;
+  const body = $('regBody');
+  if (!rows.length) { body.replaceChildren(el('tr', {}, el('td', { colspan: 7, class: 'empty' }, 'Още няма регистрации.'))); return; }
+  body.replaceChildren(...rows.map((r) => el('tr', { 'data-id': r.id },
+    el('td', {}, fmtDate(r.created_at)),
+    el('td', {}, r.name),
+    el('td', {}, r.phone || '', r.phone && r.email ? el('br') : '', r.email || ''),
+    el('td', {}, r.episode ? r.episode.id + ' · ' + r.episode.question : '#' + r.episode_id),
+    el('td', {},
+      r.first_time ? el('span', { class: 'tag first' }, 'За първи път') : '',
+      r.invited_by ? el('span', { class: 'tag' }, 'Покана от: ' + r.invited_by) : '',
+      (r.help || []).map((h) => el('span', { class: 'tag' }, 'Помага: ' + (HELP[h] || h)))),
+    el('td', {}, statusSelect(REG_STATUS, r.status, async (v) => { await api('/api/admin/registrations/' + r.id, { method: 'PATCH', body: JSON.stringify({ status: v }) }); loadStats(); })),
+    el('td', {}, el('button', { class: 'danger small', type: 'button', onclick: async () => {
+      if (!confirm('Да изтрия ли регистрацията на ' + r.name + '?')) return;
+      await api('/api/admin/registrations/' + r.id, { method: 'DELETE' });
+      loadRegistrations(); loadStats();
+    } }, 'Изтрий')))));
+}
+$('fEpisode').addEventListener('change', loadRegistrations);
+$('fStatus').addEventListener('change', loadRegistrations);
+
+async function loadContacts() {
+  const rows = await (await api('/api/admin/contacts')).json();
+  $('contactCount').textContent = rows.length;
+  const body = $('contactsBody');
+  if (!rows.length) { body.replaceChildren(el('tr', {}, el('td', { colspan: 6, class: 'empty' }, 'Още няма съобщения.'))); return; }
+  body.replaceChildren(...rows.map((c) => el('tr', { 'data-id': c.id },
+    el('td', {}, fmtDate(c.created_at)),
+    el('td', {}, c.name),
+    el('td', {}, el('a', { href: 'mailto:' + c.email }, c.email)),
+    el('td', {}, el('div', { class: 'msg' }, c.message)),
+    el('td', {}, statusSelect(CONTACT_STATUS, c.status, async (v) => { await api('/api/admin/contacts/' + c.id, { method: 'PATCH', body: JSON.stringify({ status: v }) }); loadStats(); })),
+    el('td', {}, el('button', { class: 'danger small', type: 'button', onclick: async () => {
+      if (!confirm('Да изтрия ли съобщението от ' + c.name + '?')) return;
+      await api('/api/admin/contacts/' + c.id, { method: 'DELETE' });
+      loadContacts(); loadStats();
+    } }, 'Изтрий')))));
+}
+
+// CSV със същите филтри; клетките, които започват с = + - @, се предхождат от ' (защита от формули в Excel)
+$('csvBtn').addEventListener('click', async () => {
+  const rows = await (await api(regQuery())).json();
+  const cell = (v) => { let s = String(v ?? ''); if (/^[=+\-@]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
+  const head = ['Дата', 'Име', 'Телефон', 'Имейл', 'Епизод', 'Покана от', 'За първи път', 'Помага', 'Статус'];
+  const lines = rows.map((r) => [fmtDate(r.created_at), r.name, r.phone, r.email, r.episode_id, r.invited_by, r.first_time ? 'да' : 'не',
+    (r.help || []).map((h) => HELP[h] || h).join('; '), REG_STATUS[r.status] || r.status].map(cell).join(','));
+  const blob = new Blob(['﻿' + [head.map(cell).join(','), ...lines].join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const a = el('a', { href: URL.createObjectURL(blob), download: 'registracii.csv' });
+  document.body.append(a); a.click(); a.remove();
+});
+
+if (token) showApp();
+</script>
+</body>
+</html>
