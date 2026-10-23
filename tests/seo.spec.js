@@ -158,6 +158,22 @@ test('"Карта на сайта" page describes every section, episode, host, 
   await expect(page.locator('#sm-epizodi')).toBeInViewport();
 });
 
+test('episode covers: seven distinct 16:9 images are served', async ({ request }) => {
+  const sizes = new Set();
+  for (let n = 1; n <= 7; n++) {
+    const r = await request.get(`/img/ep-${n}.webp`);
+    expect(r.status(), `ep-${n}`).toBe(200);
+    expect(r.headers()['content-type']).toContain('image/webp');
+    const body = await r.body();
+    expect(body.length, `ep-${n} size`).toBeGreaterThan(60000); // нови корици без заглавие, ~90 KB (старите бяха ~37 KB)
+    // WebP VP8: ширина и височина на 960x540
+    const w = body.readUInt16LE(26) & 0x3fff, h = body.readUInt16LE(28) & 0x3fff;
+    expect([w, h], `ep-${n} dimensions`).toEqual([960, 540]);
+    sizes.add(body.length);
+  }
+  expect(sizes.size).toBe(7); // всяка е различна
+});
+
 test('gzip, caching and canonical redirects', async ({ request }) => {
   const res = await request.get('/', { headers: { 'Accept-Encoding': 'gzip' } });
   expect(res.headers()['content-encoding']).toBe('gzip');
