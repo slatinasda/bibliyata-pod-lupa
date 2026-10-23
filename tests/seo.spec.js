@@ -36,6 +36,18 @@ test('raw HTML (no JavaScript) already contains the programme, next episode and 
   expect(html).not.toContain('<!--SSR:');
 });
 
+test('FAQ section is the last section of the page, right before the footer', async ({ request }) => {
+  const html = await (await request.get('/')).text();
+  const pos = (needle) => html.indexOf(needle);
+  expect(pos('id="kontakti"')).toBeGreaterThan(0);
+  expect(pos('id="vaprosi"')).toBeGreaterThan(pos('id="kontakti"'));
+  expect(pos('id="vaprosi"')).toBeGreaterThan(pos('id="zapishi"'));
+  expect(pos('<footer')).toBeGreaterThan(pos('id="vaprosi"'));
+  // след FAQ няма друга секция преди футъра
+  const between = html.slice(pos('id="vaprosi"'), pos('<footer'));
+  expect((between.match(/<section /g) || []).length).toBe(0);
+});
+
 test('JSON-LD is valid and consistent: Organization, EventSeries with 7 Events, Persons, FAQPage', async ({ request }) => {
   const { graph, html } = await ldGraph(request);
   const byType = (t) => graph.filter((n) => n['@type'] === t);
