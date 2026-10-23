@@ -232,3 +232,12 @@ m.addEventListener('click',function(e){if(e.target.closest('a'))set(false);});
 document.addEventListener('click',function(e){if(!m.hidden&&!m.contains(e.target))set(false);});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!m.hidden){set(false);b.focus();}});
 window.addEventListener('resize',function(){if(innerWidth>=960)set(false);});})();
+
+// FAQ е свита секция: връзка към #vaprosi (или към заглавието ѝ) я отваря.
+(function () {
+  var t = document.getElementById('qa-toggle');
+  if (!t) return;
+  function sync() { if (location.hash === '#vaprosi' || location.hash === '#qa-title') { t.open = true; t.scrollIntoView({ block: 'start' }); } }
+  sync();
+  window.addEventListener('hashchange', sync);
+})();

@@ -161,18 +161,27 @@ function faq() {
 }
 
 function faqHtml() {
-  const items = faq().map((x) => `        <details class="qa-item"><summary>${esc(x.q)}</summary><div class="qa-a"><p>${esc(x.a)}</p></div></details>`).join('\n');
+  const items = faq().map((x) => `          <details class="qa-item"><summary>${esc(x.q)}</summary><div class="qa-a"><p>${esc(x.a)}</p></div></details>`).join('\n');
+  // Цялата секция е свита: на страницата се вижда само заглавният ред, а при клик се показват въпросите.
+  // Съдържанието е в HTML-а и когато е свито (ботовете го четат), а връзка към #vaprosi го отваря (app.js).
   return `<!-- FAQ (генерира се от src/seo.js) -->
   <section class="section qa-more" id="vaprosi" aria-labelledby="qa-title">
     <div class="wrap">
-      <div class="sec-head">
-        <p class="eyebrow">Въпроси и отговори</p>
-        <h2 id="qa-title">Често задавани въпроси за библейските разговори „Библията под лупа“ в София</h2>
-        <p>Интерактивно библейско преживяване за трудни въпроси за Бог, вяра и Библията: какво е, къде и кога е, как протича една вечер и как да дойдеш.</p>
-      </div>
-      <div class="qa-list">
+      <details class="qa-toggle" id="qa-toggle">
+        <summary class="qa-toggle-sum">
+          <span class="qa-toggle-text">
+            <span class="eyebrow">Въпроси и отговори</span>
+            <h2 id="qa-title">Често задавани въпроси</h2>
+          </span>
+          <span class="qa-toggle-hint" aria-hidden="true"><span class="qa-hint-closed">Покажи</span><span class="qa-hint-open">Скрий</span></span>
+        </summary>
+        <div class="qa-toggle-body">
+          <p class="qa-intro">Интерактивно библейско преживяване за трудни въпроси за Бог, вяра и Библията: какво е, къде и кога е, как протича една вечер и как да дойдеш.</p>
+          <div class="qa-list">
 ${items}
-      </div>
+          </div>
+        </div>
+      </details>
     </div>
   </section>
 `;

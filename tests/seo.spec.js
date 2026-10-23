@@ -171,15 +171,52 @@ test('gzip, caching and canonical redirects', async ({ request }) => {
   }
 });
 
-test('FAQ is readable and works in the browser (expands, keyboard friendly)', async ({ page }) => {
+test('FAQ is collapsed by default and opens on click, keyboard and deep link', async ({ page, request }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto('/');
+  const toggle = page.locator('#qa-toggle');
+  await toggle.scrollIntoViewIfNeeded();
+
+  // свита: вижда се само заглавният ред, въпросите не се виждат
+  await expect(toggle).not.toHaveAttribute('open', '');
+  await expect(page.locator('#qa-title')).toBeVisible();
+  await expect(page.locator('.qa-toggle-hint')).toContainText('Покажи');
+  await expect(page.locator('.qa-list')).toBeHidden();
+  await expect(page.locator('.qa-intro')).toBeHidden();
+  await page.locator('#vaprosi').screenshot({ path: 'test-results/shots/faq-collapsed.png' });
+
+  // цъкане отваря секцията; отделните въпроси се отварят вътре
+  await toggle.locator('summary').first().click();
+  await expect(toggle).toHaveAttribute('open', '');
+  await expect(page.locator('.qa-toggle-hint')).toContainText('Скрий');
+  await expect(page.locator('.qa-list')).toBeVisible();
   const first = page.locator('.qa-item').first();
-  await first.scrollIntoViewIfNeeded();
   await expect(first).not.toHaveAttribute('open', '');
   await first.locator('summary').click();
-  await expect(first).toHaveAttribute('open', '');
   await expect(first.locator('.qa-a')).toBeVisible();
   await page.locator('#vaprosi').screenshot({ path: 'test-results/shots/faq.png' });
+
+  // цъкане пак я свива
+  await toggle.locator('summary').first().click();
+  await expect(toggle).not.toHaveAttribute('open', '');
+  await expect(page.locator('.qa-list')).toBeHidden();
+
+  // клавиатура: Enter върху заглавния ред
+  await toggle.locator('summary').first().focus();
+  await page.keyboard.press('Enter');
+  await expect(toggle).toHaveAttribute('open', '');
+
+  // линк към #vaprosi (напр. от картата на сайта) я отваря сам
+  await page.goto('/#vaprosi');
+  await expect(page.locator('#qa-toggle')).toHaveAttribute('open', '');
+  await expect(page.locator('.qa-list')).toBeVisible();
+
+  // за ботовете без JavaScript всичко е в HTML-а, дори свито
+  const html = await (await request.get('/')).text();
+  expect((html.match(/<details class="qa-item">/g) || []).length).toBe(9);
+  expect(html).toContain('<details class="qa-toggle" id="qa-toggle">');
+  expect(html).not.toMatch(/<details class="qa-toggle" id="qa-toggle" open/);
+
   // JS не разваля вече рендираната програма
   await expect(page.locator('#ep-list article')).toHaveCount(7);
 });
