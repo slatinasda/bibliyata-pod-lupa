@@ -114,6 +114,26 @@ test('registering with an email and with a phone is stored and shown in the admi
   expect(elena).toMatchObject({ phone: '0888 123 456', email: '', first_time: false });
 });
 
+test('submitting before the programme has loaded is queued, not lost (no page reload)', async ({ page, request }) => {
+  // забавяме /api/season, за да натиснем „Изпрати“, преди страницата да е готова
+  await page.route('**/api/season', async (route) => { await new Promise((r) => setTimeout(r, 1500)); await route.continue(); });
+  await page.goto('/');
+  let navigations = 0;
+  page.on('framenavigated', () => { navigations++; });
+  await page.fill('#c-name', 'Ранен Клик');
+  await page.fill('#c-email', 'rano@example.com');
+  await page.fill('#c-msg', 'Изпратено преди да се зареди програмата.');
+  await page.locator('#ct-form button[type=submit]').click(); // handlers още не са закачени
+  await expect(page.locator('#ct-ok')).toContainText('Благодарим', { timeout: 10000 });
+  expect(navigations).toBe(0); // страницата не се е презаредила
+  const token = await adminToken(request);
+  const rows = await (await request.get('/api/admin/contacts', { headers: auth(token) })).json();
+  const row = rows.find((r) => r.name === 'Ранен Клик');
+  expect(row).toBeTruthy();
+  expect(row.message).toBe('Изпратено преди да се зареди програмата.');
+  await request.delete(`/api/admin/contacts/${row.id}`, { headers: auth(token) });
+});
+
 test('phone/email is optional: a name alone registers, a bad value is still rejected', async ({ page, request }) => {
   await page.goto('/');
   await page.fill('#r-name', 'Само Име');

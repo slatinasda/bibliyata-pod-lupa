@@ -10,6 +10,32 @@ function post(url, body) {
     });
 }
 
+// Формите се закачат след като се зареди програмата. Ако някой натисне „Изпрати“ по-рано (бавна връзка), заявката
+// се запазва и се изпраща веднага щом страницата е готова; ако програмата не се зареди, се показва съобщение.
+var bpl = { state: 'loading', pending: [] };
+function bplFormError(form) {
+  var msg = form.querySelector('.form-err');
+  if (msg) { msg.textContent = 'Страницата не се зареди докрай. Опресни я и опитай пак.'; msg.hidden = false; }
+}
+['reg-form', 'ct-form'].forEach(function (id) {
+  var form = document.getElementById(id);
+  if (!form) return;
+  form.addEventListener('submit', function (e) {
+    if (bpl.state === 'ok') return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    if (bpl.state === 'failed') return bplFormError(form);
+    if (bpl.pending.indexOf(form) < 0) bpl.pending.push(form);
+  }, true);
+});
+function bplReady() {
+  bpl.state = 'ok';
+  bpl.pending.splice(0).forEach(function (f) { if (f.requestSubmit) f.requestSubmit(); });
+}
+function bplFailed() {
+  bpl.state = 'failed';
+  bpl.pending.splice(0).forEach(bplFormError);
+}
+
 function boot(EPISODES) {
 
   // Episode cover images (800x450 WebP, downscaled from 1920x1080 originals)
@@ -216,10 +242,12 @@ function boot(EPISODES) {
 
 fetch('/api/season', { headers: { Accept: 'application/json' } })
   .then(function (r) { if (!r.ok) throw new Error('season'); return r.json(); })
-  .then(function (d) { boot(d.episodes); })
+  .then(function (d) { boot(d.episodes); bplReady(); })
   .catch(function () {
+    bplFailed();
+    // програмата вече е в HTML-а от сървъра; съобщение се показва само ако списъкът е празен
     var l = document.getElementById('ep-list');
-    if (l) l.innerHTML = '<p class="load-err">Програмата не се зареди. Опресни страницата.</p>';
+    if (l && !l.children.length) l.innerHTML = '<p class="load-err">Програмата не се зареди. Опресни страницата.</p>';
   });
 
 (function(){var r=document.querySelector('.social-rail'),fs=['zapishi','kontakti'].map(function(i){return document.getElementById(i)}),on={};if(!r||!('IntersectionObserver' in window))return;
