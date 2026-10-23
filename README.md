@@ -47,8 +47,16 @@ npm run test:e2e
    - `JWT_SECRET` = дълъг случаен низ
    - `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`
    - по желание `ADMIN_TOTP_SECRET` (генерира се с `npm run totp`), `ZEPTOMAIL_TOKEN`, `NOTIFY_FROM`, `NOTIFY_TO`
-3. Домейн: Railway дава безплатен адрес; истинският домейн се добавя в Settings > Networking.
-4. Админът е на `https://<домейн>/admin/`.
+3. Домейн: `bibliatapodlupa.com` е добавен към услугата `web` (`railway domain bibliatapodlupa.com --service web`). DNS записите в Cloudflare:
+
+   | Тип | Име | Стойност | Proxy |
+   |---|---|---|---|
+   | CNAME | `@` | `wg4zbaze.up.railway.app` | първо „DNS only“ (сив облак) |
+   | TXT | `_railway-verify` | `railway-verify=…` (токенът е в `railway domain status bibliatapodlupa.com --service web`) | |
+
+   След като Railway покаже сертификата като активен, в Cloudflare може да се включи Proxy (SSL/TLS режим Full).
+4. Адресът на сайта (canonical, Open Graph, `robots.txt`, `sitemap.xml`) е `https://bibliatapodlupa.com/`; сменя се в `public/index.html`, `robots.txt` и `sitemap.xml`.
+5. Админът е на `https://bibliatapodlupa.com/admin/`.
 
 Таблиците и админът се създават сами при първия старт.
 

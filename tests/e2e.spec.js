@@ -54,6 +54,20 @@ test('public site loads with the season data and no console errors', async ({ pa
   expect(errors).toEqual([]);
 });
 
+test('domain setup: canonical + Open Graph, robots.txt and sitemap.xml', async ({ page, request }) => {
+  await page.goto('/');
+  await expect(page.locator('link[rel=canonical]')).toHaveAttribute('href', 'https://bibliatapodlupa.com/');
+  await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content', 'https://bibliatapodlupa.com/');
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', 'https://bibliatapodlupa.com/img/og.png');
+  const og = await request.get('/img/og.png');
+  expect(og.status()).toBe(200);
+  expect(og.headers()['content-type']).toContain('image/png');
+  const robots = await (await request.get('/robots.txt')).text();
+  expect(robots).toContain('Disallow: /admin/');
+  expect(robots).toContain('Sitemap: https://bibliatapodlupa.com/sitemap.xml');
+  expect(await (await request.get('/sitemap.xml')).text()).toContain('<loc>https://bibliatapodlupa.com/</loc>');
+});
+
 test('registration form validates on the client and sends nothing', async ({ page }) => {
   let posted = false;
   page.on('request', (r) => { if (r.url().includes('/api/register')) posted = true; });
