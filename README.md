@@ -54,6 +54,13 @@ npm run test:e2e
    | CNAME | `@` | `wg4zbaze.up.railway.app` | първо „DNS only“ (сив облак) |
    | TXT | `_railway-verify` | `railway-verify=…` (токенът е в `railway domain status bibliatapodlupa.com --service web`) | |
 
+   За `www.bibliatapodlupa.com` (пренасочва се с 301 към адреса без www, кодът е в `src/app.js`):
+
+   | Тип | Име | Стойност | Proxy |
+   |---|---|---|---|
+   | CNAME | `www` | `nhu5sczr.up.railway.app` | DNS only (сив облак) |
+   | TXT | `_railway-verify.www` | `railway-verify=…` (токенът е в `railway domain status www.bibliatapodlupa.com --service web`) | |
+
    След като Railway покаже сертификата като активен, в Cloudflare може да се включи Proxy (SSL/TLS режим Full).
 4. Адресът на сайта (canonical, Open Graph, `robots.txt`, `sitemap.xml`) е `https://bibliatapodlupa.com/`; сменя се в `public/index.html`, `robots.txt` и `sitemap.xml`.
 5. Админът е на `https://bibliatapodlupa.com/admin/`.
