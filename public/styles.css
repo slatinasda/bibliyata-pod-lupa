@@ -541,3 +541,25 @@ legend + * { clear: both; }
 .qa-a { padding: 0 24px 22px; }
 .qa-a p { margin: 0; color: var(--ink-2); font-size: 1.05rem; line-height: 1.65; max-width: 70ch; }
 @media (max-width: 600px) { .qa-item summary { padding: 16px 18px; font-size: 1.1rem; } .qa-a { padding: 0 18px 18px; } }
+/* Страница „Карта на сайта“ (src/seo.js) */
+.sm-header .nav { justify-content: space-between; }
+.sm-back { color: var(--ink-2); text-decoration: none; font-weight: 600; }
+.sm-back:hover { color: var(--cta); }
+.sm-page { padding-block: clamp(40px, 6vw, 80px); }
+.sm-page .wrap { max-width: 900px; }
+.sm-h1 { font-size: var(--step-3, 2.2rem); line-height: 1.15; }
+.sm-toc ol { margin: 0 0 clamp(28px, 4vw, 44px); padding-left: 1.3em; display: grid; gap: 6px; }
+.sm-toc a { color: var(--ink); text-underline-offset: 3px; }
+.sm-toc a:hover { color: var(--cta); }
+.sm-sec { padding: 22px 24px; margin-bottom: 14px; background: var(--paper-3, #FBF7EE); border: 1px solid var(--line); border-radius: 14px; }
+.sm-sec h2 { font-size: var(--step-2); margin: 0 0 8px; }
+.sm-sec h2 a { color: var(--ink); text-decoration: none; }
+.sm-sec h2 a:hover { color: var(--cta); }
+.sm-sec p { margin: 0 0 10px; color: var(--ink-2); line-height: 1.65; }
+.sm-sec ul { margin: 0 0 12px; padding-left: 1.2em; color: var(--ink-2); display: grid; gap: 6px; }
+.sm-sec li { line-height: 1.55; }
+.sm-sec .sm-kw { font-size: .95rem; }
+.sm-sec .sm-kw b { color: var(--forest); }
+.sm-sec .sm-link { margin: 0; }
+.sm-sec .sm-link a { color: var(--cta); font-weight: 600; text-decoration: none; }
+.sm-sec .sm-link a:hover { text-decoration: underline; }

@@ -47,6 +47,7 @@ app.get('/', (req, res) => {
 app.get('/index.html', (req, res) => res.redirect(301, '/'));
 app.get('/robots.txt', send('text/plain', 'public, max-age=3600')(() => seo.robotsTxt()));
 app.get('/sitemap.xml', send('application/xml', 'public, max-age=3600')(() => seo.sitemapXml(template.modified)));
+app.get('/karta-na-sayta', send('text/html', 'public, max-age=300')(() => seo.sitemapPageHtml(template.modified)));
 app.get('/llms.txt', send('text/plain', 'public, max-age=3600')(() => seo.llmsTxt()));
 app.get('/llms-full.txt', send('text/plain', 'public, max-age=3600')(() => seo.llmsFull()));
 

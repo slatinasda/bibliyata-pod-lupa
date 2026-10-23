@@ -22,6 +22,71 @@ const HOSTS = [
   { key: 'misho', name: 'Михаил Гърков', role: 'Бизнесмен и евангелизатор' },
 ];
 
+// ---- Ключови думи и секции на сайта: един източник за meta keywords, JSON-LD, sitemap.xml, страницата
+// „Карта на сайта“, llms.txt и llms-full.txt ----------------------------------------------------------
+const KEYWORDS = [
+  'Библията под лупа', 'библейски разговори София', 'трудни въпроси за Бог', 'интерактивно библейско преживяване',
+  'изучаване на Библията София', 'Библията в контекст', 'вяра и съмнения', 'християнство София', 'Такъв ли е Бог',
+  'Сезон 01', 'събота вечер', 'безплатен вход', 'ЦАСД София-Запад', 'Исус', 'Библейска общност София',
+  'Bible study Sofia Bulgaria',
+];
+
+function sections() {
+  return [
+    {
+      id: 'nachalo', title: `Начало: „${SEASON.title}“`,
+      summary: `Сезон ${SEASON.number} „${SEASON.title}“ на ${BRAND}: следващата вечер с дата, тема и място, бутон за регистрация и общността зад проекта.`,
+      keywords: ['Библията под лупа', `Сезон ${SEASON.number}`, SEASON.title, 'следващ епизод', 'събота вечер', 'София'],
+    },
+    {
+      id: 'kakvo-e', title: `Какво е ${BRAND}?`,
+      summary: 'Интерактивно библейско преживяване: задаваме трудните въпроси, изследваме текста в контекста му и откриваме какъв е Бог в действителност. Не е проповед и не е лекция. Можеш да пробваш картите Да, Не, Може би и Коментар.',
+      keywords: ['интерактивно библейско преживяване', 'трудни въпроси за Бог', 'не е проповед', 'карти Да Не Може би Коментар', 'Библията в контекст'],
+    },
+    {
+      id: 'vecher', title: 'Как протича една вечер?',
+      summary: 'Четири стъпки: Да · Не · Може би (5 провокативни твърдения), Гледните точки (дискусия), Текстът (библейският текст в историческия му контекст) и Почерпката (разговори на чаша чай).',
+      keywords: ['изучаване на Библията', 'дискусия', 'библейски текст в контекст', 'почерпка', 'Божият характер'],
+      items: ['Да · Не · Може би', 'Гледните точки', 'Текстът', 'Почерпката'],
+    },
+    {
+      id: 'epizodi', title: `Епизоди на Сезон ${SEASON.number}`,
+      summary: `${EPISODES.length} съботни вечери от ${fullDate(FIRST.date)} до ${fullDate(LAST.date)}, всяка от ${SEASON.time}. Всеки епизод е един труден въпрос за Бог.`,
+      keywords: ['епизоди', 'въпроси за Бог', 'Исус', 'грях и прошка', 'небето', 'Божията любов'],
+      items: EPISODES.map((e) => `Епизод ${e.id} · ${longDate(e.date)} · „${e.question}“ · Води: ${e.host}`),
+    },
+    {
+      id: 'parvi-pat', title: 'Идваш за първи път? Кой ще води сезона?',
+      summary: 'Отговори за първото посещение: не е нужно да вярваш, не е нужно да говориш, програмата е около 45 минути, входът е свободен и можеш да доведеш приятел. Водещите на сезона.',
+      keywords: ['за първи път', 'безплатен вход', 'вяра и съмнения', 'водещи', 'ЦАСД София-Запад'],
+      items: HOSTS.map((h) => `${h.name}: ${h.role}`),
+    },
+    {
+      id: 'vaprosi', title: 'Често задавани въпроси',
+      summary: 'Кратки отговори: какво е Библията под лупа, къде и кога е, кои въпроси разглеждаме, как протича вечерта, картите, може ли с съмнения, безплатно ли е, водещите и приятел.',
+      keywords: ['често задавани въпроси', 'библейски разговори София', 'изучаване на Библията', 'безплатно'],
+      items: faq().map((x) => x.q),
+    },
+    {
+      id: 'zapishi', title: 'Запази си място',
+      summary: 'Форма за регистрация за епизод: избираш вечер и оставяш име; телефонът или имейлът са по желание; можеш да отбележиш, че идваш за първи път или че искаш да помагаш (посрещане, почерпка, звук и техника, снимки и видео, детска програма, подреждане на залата).',
+      keywords: ['регистрация', 'запази си място', 'запиши се', 'доброволци'],
+    },
+    {
+      id: 'pokani', title: 'Доведи един човек',
+      summary: 'Готово съобщение за покана на приятел с темата на избрания епизод, което се копира с един бутон, и идеи как да поканиш някого.',
+      keywords: ['покана', 'доведи приятел', 'доведи един човек'],
+    },
+    {
+      id: 'kontakti', title: 'Контакти: Пиши ни и социални мрежи',
+      summary: 'Форма за въпрос, идея за тема или предложение, и връзки към Facebook, Instagram и YouTube на общността.',
+      keywords: ['контакти', 'Facebook', 'Instagram', 'YouTube', 'пиши ни'],
+      items: [`Facebook: ${SOCIAL.facebook}`, `Instagram: ${SOCIAL.instagram}`, `YouTube: ${SOCIAL.youtube}`],
+    },
+  ];
+}
+
+const SITEMAP_PAGE = `${SITE}/karta-na-sayta`;
 const TITLE = `${BRAND} · Библейски разговори за трудни въпроси за Бог в София`;
 const DESCRIPTION =
   `Седем съботни вечери в София с открит разговор за трудните въпроси за Бог и Библията. ` +
@@ -162,7 +227,19 @@ function jsonLd(modified) {
       {
         '@type': 'WebPage', '@id': pg, url: `${SITE}/`, name: TITLE, description: DESCRIPTION, inLanguage: 'bg-BG',
         isPartOf: { '@id': web }, about: { '@id': series }, primaryImageOfPage: { '@type': 'ImageObject', url: `${SITE}/img/og.png` },
-        dateModified: modified,
+        dateModified: modified, keywords: KEYWORDS.join(', '),
+        hasPart: sections().map((x) => ({ '@id': `${SITE}/#part-${x.id}` })),
+      },
+      ...sections().map((x) => ({
+        '@type': 'WebPageElement', '@id': `${SITE}/#part-${x.id}`, name: x.title, description: x.summary,
+        url: `${SITE}/#${x.id}`, keywords: x.keywords.join(', '), isPartOf: { '@id': pg },
+      })),
+      ...sections().map((x) => ({
+        '@type': 'SiteNavigationElement', '@id': `${SITE}/#nav-${x.id}`, name: x.title, url: `${SITE}/#${x.id}`,
+      })),
+      {
+        '@type': 'WebPage', '@id': `${SITEMAP_PAGE}#page`, url: SITEMAP_PAGE, name: 'Карта на сайта', isPartOf: { '@id': web },
+        description: 'Пълна карта на сайта: всички секции, епизоди, водещи, въпроси и ключови думи.',
       },
       {
         '@type': 'EventSeries', '@id': series,
@@ -211,6 +288,7 @@ function renderHome(tpl, now = new Date()) {
   const sub = (re, fn) => { h = h.replace(re, fn); };
   sub('<!--SSR:JSONLD-->', () => `<script type="application/ld+json">${safeJson(jsonLd(tpl.modified))}</script>`);
   sub('<!--SSR:FAQ-->', () => faqHtml());
+  sub(/(<meta name="keywords" content=")[^"]*(">)/, (m, a, b) => `${a}${esc(KEYWORDS.join(', '))}${b}`);
   sub(/(<div class="ep-scroll" id="ep-list"[^>]*>)<\/div>/, (m, open) => `${open}${episodesHtml(today, next)}</div>`);
   if (next) {
     const [, mo, d] = parts(next.date);
@@ -260,25 +338,126 @@ Sitemap: ${SITE}/sitemap.xml
 `;
 }
 
-// ---- sitemap.xml с alternate и изображения -----------------------------------------------------------
-function sitemapXml(modified) {
-  const imgs = [
-    { loc: `${SITE}/img/og.png`, title: `${BRAND}: логото и сезон ${SEASON.number}` },
+// ---- sitemap.xml: два адреса (началната страница и подробната „Карта на сайта“), alternate, изображения и
+// коментар, който описва всяка секция и ключовите думи (чете се и от хора, и от AI, и от ботове) -------
+function allImages() {
+  return [
+    { loc: `${SITE}/img/og.png`, title: `${BRAND}: логото и Сезон ${SEASON.number}` },
+    { loc: `${SITE}/img/logo.webp`, title: `Логото на ${BRAND}: лупа над отворена Библия` },
     ...EPISODES.map((e) => ({ loc: `${SITE}/img/ep-${e.id}.webp`, title: `Епизод ${e.id}: ${e.question}` })),
     ...HOSTS.map((h) => ({ loc: `${SITE}/img/hosts/${h.key}.webp`, title: `${h.name}, водещ на ${BRAND}` })),
   ];
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-  <url>
-    <loc>${SITE}/</loc>
+}
+
+function sitemapXml(modified) {
+  const secs = sections();
+  const imgs = allImages();
+  const description = secs.map((x) => `  ${x.title} (${SITE}/#${x.id}): ${x.summary} Ключови думи: ${x.keywords.join(', ')}.`).join('\n').replace(/--/g, '-');
+  const url = (loc, prio, freq, withImages) => `  <url>
+    <loc>${loc}</loc>
     <lastmod>${modified}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="bg" href="${SITE}/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="${SITE}/"/>
-${imgs.map((i) => `    <image:image><image:loc>${i.loc}</image:loc><image:title>${esc(i.title)}</image:title></image:image>`).join('\n')}
-  </url>
+    <changefreq>${freq}</changefreq>
+    <priority>${prio}</priority>
+    <xhtml:link rel="alternate" hreflang="bg" href="${loc}"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="${loc}"/>
+${withImages ? imgs.map((i) => `    <image:image><image:loc>${i.loc}</image:loc><image:title>${esc(i.title)}</image:title></image:image>`).join('\n') + '\n' : ''}  </url>`;
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ${BRAND} (${BRAND_EN}): карта на съдържанието на сайта ${SITE}/
+  Сайтът е една страница със секции (адресите със # са секции на началната страница), плюс страницата ${SITEMAP_PAGE}
+  с пълно описание на всички секции, епизоди, водещи, въпроси и ключови думи.
+  Секции на началната страница:
+${description}
+  Основни ключови думи: ${KEYWORDS.join(', ')}.
+  Пълен текст за AI: ${SITE}/llms-full.txt
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+${url(`${SITE}/`, '1.0', 'weekly', true)}
+${url(SITEMAP_PAGE, '0.8', 'weekly', false)}
 </urlset>
+`;
+}
+
+// ---- HTML страница „Карта на сайта“: всички секции, епизоди, водещи, въпроси, ключови думи и файлове ----
+function sitemapPageHtml(modified) {
+  const secs = sections();
+  const title = `Карта на сайта · ${BRAND}: секции, епизоди, водещи и ключови думи`;
+  const desc = `Пълна карта на сайта на ${BRAND}: всички секции, епизодите на Сезон ${SEASON.number}, водещите, често задаваните въпроси и основните ключови думи за библейските разговори в София.`;
+  const body = secs.map((x) => `      <section class="sm-sec" aria-labelledby="sm-${x.id}">
+        <h2 id="sm-${x.id}"><a href="/#${x.id}">${esc(x.title)}</a></h2>
+        <p>${esc(x.summary)}</p>${x.items ? `
+        <ul>${x.items.map((i) => `<li>${esc(i)}</li>`).join('')}</ul>` : ''}
+        <p class="sm-kw"><b>Ключови думи:</b> ${esc(x.keywords.join(', '))}</p>
+        <p class="sm-link"><a href="/#${x.id}">Към секцията →</a></p>
+      </section>`).join('\n');
+  const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      { '@type': 'CollectionPage', '@id': `${SITEMAP_PAGE}#webpage`, url: SITEMAP_PAGE, name: title, description: desc, inLanguage: 'bg-BG', isPartOf: { '@id': `${SITE}/#website` }, dateModified: modified, keywords: KEYWORDS.join(', '), about: { '@id': `${SITE}/#organization` } },
+      { '@type': 'BreadcrumbList', itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Начало', item: `${SITE}/` },
+        { '@type': 'ListItem', position: 2, name: 'Карта на сайта', item: SITEMAP_PAGE },
+      ] },
+      { '@type': 'ItemList', name: `Секции на ${BRAND}`, numberOfItems: secs.length, itemListElement: secs.map((x, i) => ({ '@type': 'ListItem', position: i + 1, name: x.title, url: `${SITE}/#${x.id}` })) },
+    ],
+  };
+  return `<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>${esc(title)}</title>
+<meta name="description" content="${esc(desc)}">
+<meta name="keywords" content="${esc(KEYWORDS.join(', '))}">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="theme-color" content="#F4EDDF">
+<link rel="canonical" href="${SITEMAP_PAGE}">
+<link rel="alternate" hreflang="bg" href="${SITEMAP_PAGE}">
+<link rel="alternate" hreflang="x-default" href="${SITEMAP_PAGE}">
+<meta property="og:title" content="${esc(title)}">
+<meta property="og:description" content="${esc(desc)}">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="bg_BG">
+<meta property="og:url" content="${SITEMAP_PAGE}">
+<meta property="og:site_name" content="${BRAND}">
+<meta property="og:image" content="${SITE}/img/og.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,500;0,7..72,600;0,7..72,700;1,7..72,500&family=Onest:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<script type="application/ld+json">${safeJson(graph)}</script>
+</head>
+<body>
+<header class="site-header sm-header"><div class="wrap nav"><a class="logo logo-sm" href="/" aria-label="${BRAND}, начало"><img class="bpl-logo" src="/img/logo.webp" alt="" width="800" height="296" style="width:136px" decoding="async"></a><a class="sm-back" href="/">← Към сайта</a></div></header>
+<main id="main" class="sm-page">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Карта на сайта</p>
+      <h1 class="sm-h1">Карта на сайта „${BRAND}“</h1>
+      <p>Всичко на сайта на едно място: секциите, ${EPISODES.length}-те епизода на Сезон ${SEASON.number} „${SEASON.title}“, водещите, често задаваните въпроси и основните ключови думи. ${BRAND} са открити библейски разговори в София за трудните въпроси за Бог, всяка събота от ${SEASON.time} в ${VENUE}, ${STREET}.</p>
+    </div>
+    <nav class="sm-toc" aria-label="Секции на сайта"><ol>${secs.map((x) => `<li><a href="#sm-${x.id}">${esc(x.title)}</a></li>`).join('')}</ol></nav>
+${body}
+    <section class="sm-sec" aria-labelledby="sm-kw">
+      <h2 id="sm-kw">Основни ключови думи</h2>
+      <p>${esc(KEYWORDS.join(', '))}.</p>
+    </section>
+    <section class="sm-sec" aria-labelledby="sm-files">
+      <h2 id="sm-files">Файлове за търсачки и AI системи</h2>
+      <ul>
+        <li><a href="/sitemap.xml">sitemap.xml</a>: карта за търсачките</li>
+        <li><a href="/robots.txt">robots.txt</a>: правила за ботове (всички търсачки и AI системи са добре дошли)</li>
+        <li><a href="/llms.txt">llms.txt</a> и <a href="/llms-full.txt">llms-full.txt</a>: описание на сайта за AI системи, на български и английски</li>
+      </ul>
+    </section>
+  </div>
+</main>
+<footer class="site-footer"><div class="wrap"><div class="legal"><span>© 2026 ${BRAND}</span><span>Всяка събота от ${SEASON.time} · ${VENUE}, ${STREET}</span></div></div></footer>
+</body>
+</html>
 `;
 }
 
@@ -290,13 +469,11 @@ function llmsTxt() {
 
 English summary: ${BRAND_EN} is a community in Sofia, Bulgaria that hosts open, interactive Bible conversations about hard questions on God. Season ${SEASON.number} ("Is God like that?" / "${SEASON.title}") runs ${EPISODES.length} Saturday evenings at 18:00 from ${FIRST.date} to ${LAST.date} at ${VENUE}, ${STREET}, Sofia. Free entry, everyone welcome: believers, doubters and the curious. Content is in Bulgarian.
 
-## Основно
-- [Начална страница](${SITE}/): какво е, следващ епизод, как протича една вечер
-- [Епизоди на Сезон ${SEASON.number}](${SITE}/#epizodi): ${EPISODES.length} теми, дати и водещи
-- [Идваш за първи път?](${SITE}/#parvi-pat): отговори за първо посещение
-- [Често задавани въпроси](${SITE}/#vaprosi): кратки отговори
-- [Запази си място](${SITE}/#zapishi): регистрация за вечер
-- [Пиши ни](${SITE}/#kontakti): въпроси и предложения
+## Секции на сайта
+${sections().map((x) => `- [${x.title}](${SITE}/#${x.id}): ${x.summary}`).join('\n')}
+- [Карта на сайта](${SITEMAP_PAGE}): всички секции, епизоди, водещи, въпроси и ключови думи на едно място
+
+Ключови думи: ${KEYWORDS.join(', ')}.
 
 ## За AI системи
 - [Пълно описание в текст](${SITE}/llms-full.txt): цялото съдържание на сайта в един файл
@@ -320,7 +497,11 @@ function llmsFull() {
 ## Какво е ${BRAND}
 „${BRAND}“ е интерактивно библейско преживяване и общност в София, България. Задаваме трудните въпроси за Бог, изследваме Библията в нейния текст и исторически контекст и откриваме какъв е Бог в действителност. Не е проповед и не е лекция, а открит разговор. Тук въпросите са добре дошли.
 
-Ключови думи: Библията под лупа, библейски разговори, трудни въпроси за Бог, изучаване на Библията в София, интерактивно библейско преживяване, християнство в София, въпроси за вярата, събота вечер, Исус, Библията в контекст, общност за хора със съмнения.
+Ключови думи: ${KEYWORDS.join(', ')}.
+
+## Карта на сайта (секции)
+Сайтът е една страница със секции; подробна карта: ${SITEMAP_PAGE}
+${sections().map((x) => `- ${x.title} (${SITE}/#${x.id}): ${x.summary} Ключови думи: ${x.keywords.join(', ')}.`).join('\n')}
 
 ## Сезон ${SEASON.number}: „${SEASON.title}“
 ${EPISODES.length} епизода, всяка събота от ${SEASON.time}, от ${fullDate(FIRST.date)} до ${fullDate(LAST.date)}.
@@ -357,5 +538,5 @@ ${BRAND_EN} (Bulgarian: "${BRAND}") is a community and interactive Bible experie
 }
 
 module.exports = {
-  SITE, TITLE, DESCRIPTION, loadTemplate, renderHome, robotsTxt, sitemapXml, llmsTxt, llmsFull, jsonLd, faq,
+  SITE, TITLE, DESCRIPTION, KEYWORDS, SITEMAP_PAGE, sections, loadTemplate, renderHome, robotsTxt, sitemapXml, sitemapPageHtml, llmsTxt, llmsFull, jsonLd, faq,
 };

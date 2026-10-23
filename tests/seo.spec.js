@@ -86,7 +86,14 @@ test('sitemap.xml, llms.txt and llms-full.txt', async ({ request }) => {
   expect(xml).toContain(`<loc>${SITE}/</loc>`);
   expect(xml).toMatch(/<lastmod>\d{4}-\d\d-\d\d<\/lastmod>/);
   expect(xml).toContain('hreflang="x-default"');
-  expect((xml.match(/<image:image>/g) || []).length).toBe(11); // лого + 7 епизода + 3 водещи
+  expect((xml.match(/<image:image>/g) || []).length).toBe(12); // og + лого + 7 епизода + 3 водещи
+  expect((xml.match(/<url>/g) || []).length).toBe(2);
+  expect(xml).toContain(`<loc>${SITE}/karta-na-sayta</loc>`);
+  // описание на всички секции и ключови думи в самия файл (в коментар)
+  for (const id of ['nachalo', 'kakvo-e', 'vecher', 'epizodi', 'parvi-pat', 'vaprosi', 'zapishi', 'pokani', 'kontakti']) expect(xml).toContain(`${SITE}/#${id}`);
+  expect(xml).toContain('Основни ключови думи:');
+  expect(xml).toContain('трудни въпроси за Бог');
+  expect(xml.match(/<!--([\s\S]*?)-->/)[1].includes('--')).toBe(false); // XML коментарът не трябва да съдържа "--"
 
   const short = await (await request.get('/llms.txt')).text();
   expect(short.startsWith('# Библията под лупа')).toBe(true);
@@ -97,6 +104,46 @@ test('sitemap.xml, llms.txt and llms-full.txt', async ({ request }) => {
   for (const kw of ['Иска ли Бог зли хора в небето?', 'Мирослав Милков', 'Стоян Петков', 'Михаил Гърков', 'ЦАСД София-Запад', 'English summary', 'Входът е свободен']) {
     expect(full).toContain(kw);
   }
+});
+
+test('"Карта на сайта" page describes every section, episode, host, FAQ question and the keywords', async ({ page, request }) => {
+  const res = await request.get('/karta-na-sayta');
+  expect(res.status()).toBe(200);
+  const html = await res.text();
+  expect(html).toContain('<title>Карта на сайта · Библията под лупа');
+  expect(html).toContain(`rel="canonical" href="${SITE}/karta-na-sayta"`);
+  // всичките 9 секции със заглавие, описание, ключови думи и връзка
+  expect((html.match(/class="sm-sec"/g) || []).length).toBe(11); // 9 секции + ключови думи + файлове
+  for (const id of ['nachalo', 'kakvo-e', 'vecher', 'epizodi', 'parvi-pat', 'vaprosi', 'zapishi', 'pokani', 'kontakti']) {
+    expect(html).toContain(`href="/#${id}"`);
+  }
+  for (const q of ['Иска ли Бог зли хора в небето?', 'Защо Исус трябваше да умре?', 'Мирослав Милков', 'Стоян Петков', 'Михаил Гърков', 'Къде в София има библейски разговори за трудни въпроси за Бог?', 'ЦАСД София-Запад']) {
+    expect(html).toContain(q);
+  }
+  expect(html).toContain('Основни ключови думи');
+  for (const f of ['/sitemap.xml', '/robots.txt', '/llms.txt', '/llms-full.txt']) expect(html).toContain(`href="${f}"`);
+  const ld = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1])['@graph'];
+  expect(ld.find((n) => n['@type'] === 'ItemList').numberOfItems).toBe(9);
+  expect(ld.find((n) => n['@type'] === 'BreadcrumbList').itemListElement).toHaveLength(2);
+
+  // начална страница: връзка във футъра, секции и ключови думи в JSON-LD
+  const home = await (await request.get('/')).text();
+  expect(home).toContain('href="/karta-na-sayta"');
+  const g = JSON.parse(home.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1])['@graph'];
+  expect(g.filter((n) => n['@type'] === 'WebPageElement')).toHaveLength(9);
+  expect(g.filter((n) => n['@type'] === 'SiteNavigationElement')).toHaveLength(9);
+  expect(home).toMatch(/<meta name="keywords" content="[^"]*интерактивно библейско преживяване[^"]*"/);
+  const llms = await (await request.get('/llms.txt')).text();
+  expect(llms).toContain('## Секции на сайта');
+  expect(llms).toContain(`${SITE}/karta-na-sayta`);
+
+  // визуално: страницата се чете добре
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto('/karta-na-sayta');
+  await expect(page.locator('h1')).toContainText('Карта на сайта');
+  await page.screenshot({ path: 'test-results/shots/sitemap-page.png', fullPage: true });
+  await page.click('.sm-toc a[href="#sm-epizodi"]');
+  await expect(page.locator('#sm-epizodi')).toBeInViewport();
 });
 
 test('gzip, caching and canonical redirects', async ({ request }) => {
