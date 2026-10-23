@@ -174,6 +174,24 @@ test('episode covers: seven distinct 16:9 images are served', async ({ request }
   expect(sizes.size).toBe(7); // всяка е различна
 });
 
+test('www redirects to the non-www domain (301, path and query kept)', async () => {
+  const http = require('http');
+  const get = (path, host) => new Promise((resolve, reject) => {
+    http.get({ host: '127.0.0.1', port: 3100, path, headers: { Host: host } }, (res) => { res.resume(); resolve({ status: res.statusCode, location: res.headers.location }); }).on('error', reject);
+  });
+  for (const [path, expected] of [['/', '/'], ['/karta-na-sayta', '/karta-na-sayta'], ['/robots.txt', '/robots.txt'], ['/admin/', '/admin/'], ['/?utm_source=x&a=b', '/?utm_source=x&a=b']]) {
+    const r = await get(path, 'www.bibliatapodlupa.com');
+    expect(r.status, `www ${path}`).toBe(301);
+    expect(r.location).toBe(`https://bibliatapodlupa.com${expected}`);
+  }
+  // с порт и главни букви също
+  expect((await get('/', 'WWW.BibliataPodLupa.com:443')).status).toBe(301);
+  // основният домейн, localhost и Railway адресът не се пренасочват
+  for (const host of ['bibliatapodlupa.com', '127.0.0.1:3100', 'web-production-a7f9d.up.railway.app']) {
+    expect((await get('/', host)).status, host).toBe(200);
+  }
+});
+
 test('gzip, caching and canonical redirects', async ({ request }) => {
   const res = await request.get('/', { headers: { 'Accept-Encoding': 'gzip' } });
   expect(res.headers()['content-encoding']).toBe('gzip');

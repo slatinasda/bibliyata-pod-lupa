@@ -14,6 +14,15 @@ const app = express();
 // Зад прокси на Railway: взимаме истинския IP от X-Forwarded-For (нужно за лимитите по IP).
 app.set('trust proxy', 1);
 app.disable('x-powered-by');
+
+// Каноничният адрес е без www: www.<домейн> се пренасочва с 301 към https://<домейн> със същия път и параметри.
+// Така има една версия на сайта за търсачките и AI, а връзките и сертификатът не се разминават.
+const APEX = new URL(require('./seo').SITE).hostname;
+app.use((req, res, next) => {
+  const host = String(req.headers.host || '').toLowerCase().split(':')[0];
+  if (host === `www.${APEX}`) return res.redirect(301, `https://${APEX}${req.originalUrl}`);
+  next();
+});
 app.use(compression()); // по-малки страници и по-бърз сайт (Core Web Vitals)
 app.use(securityHeaders);
 
