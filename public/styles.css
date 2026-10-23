@@ -507,3 +507,23 @@ legend + * { clear: both; }
 .form-err { color: var(--err); font-weight: 600; font-size: .95rem; margin: 0; }
 .form-foot .form-err { text-align: center; }
 .load-err { padding: 24px; color: var(--ink-2); }
+
+/* Social buttons: brand glyph colours (moved out of the old footer logo SVG) */
+/* official brand colours */
+.social-rail a[data-s], .f-social a[data-s], .ch-ico { color: #fff; border: 0; }
+.social-rail a[data-s] { box-shadow: 0 0 0 2px #fff, 0 6px 14px rgba(24,38,31,.3); }
+.f-social a[data-s] { box-shadow: 0 0 0 2px #fff, 0 4px 10px rgba(24,38,31,.2); }
+.social-rail a[data-s="fb"], .f-social a[data-s="fb"], .ch-fb .ch-ico { background: #1877F2; color: #fff; }
+.social-rail a[data-s="yt"], .f-social a[data-s="yt"], .ch-yt .ch-ico { background: #FF0000; color: #fff; }
+.social-rail a[data-s="ig"], .f-social a[data-s="ig"], .ch-ig .ch-ico { background: radial-gradient(circle at 30% 107%, #FEDA77 0%, #F58529 25%, #DD2A7B 50%, #8134AF 75%, #515BD4 100%); color: #fff; }
+.social-rail a[data-s]:hover, .social-rail a[data-s]:focus-visible { color: #fff; filter: brightness(.92); }
+.social-rail a[data-s="fb"]:hover { background: #1877F2; } .social-rail a[data-s="yt"]:hover { background: #FF0000; } .social-rail a[data-s="ig"]:hover { background: radial-gradient(circle at 30% 107%, #FEDA77 0%, #F58529 25%, #DD2A7B 50%, #8134AF 75%, #515BD4 100%); }
+.channel.ch-fb:hover { border-color: #1877F2; } .channel.ch-ig:hover { border-color: #DD2A7B; } .channel.ch-yt:hover { border-color: #FF0000; }
+/* muted backgrounds, exact brand glyph colours */
+.social-rail a[data-s], .f-social a[data-s], .ch-ico { background: #FBF7EE !important; border: 1px solid rgba(24,38,31,.12); }
+.social-rail a[data-s] { box-shadow: 0 0 0 2px rgba(251,247,238,.9), 0 6px 14px rgba(24,38,31,.22); }
+.f-social a[data-s] { box-shadow: 0 4px 10px rgba(24,38,31,.12); }
+.ch-ico { background: #F6EFE1 !important; box-shadow: none; }
+.social-rail a[data-s="fb"], .f-social a[data-s="fb"], .ch-fb .ch-ico { color: #1877F2; }
+.social-rail a[data-s="yt"], .f-social a[data-s="yt"], .ch-yt .ch-ico { color: #FF0000; }
+.social-rail a[data-s]:hover, .social-rail a[data-s]:focus-visible { background: #fff !important; filter: none; }

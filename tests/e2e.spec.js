@@ -38,6 +38,15 @@ test('public site loads with the season data and no console errors', async ({ pa
   await page.locator('.host').first().scrollIntoViewIfNeeded();
   await expect.poll(() => page.locator('.host img.ava-img').evaluateAll((is) => is.map((i) => i.complete && i.naturalWidth))).toEqual([720, 600, 720]);
   await expect(page.locator('#r-who')).toHaveCount(0);
+
+  // новото лого в хедъра и футъра (картинка, не вграден SVG)
+  const logos = page.locator('img.bpl-logo');
+  await expect(logos).toHaveCount(2);
+  await expect.poll(() => logos.evaluateAll((is) => is.map((i) => i.complete && i.naturalWidth))).toEqual([800, 800]);
+  await expect(page.locator('svg.bpl-logo')).toHaveCount(0);
+  // иконите на социалните мрежи пазят кремавия фон (правилата, които живееха във футърното SVG)
+  const railBg = await page.locator('.social-rail a').first().evaluate((a) => getComputedStyle(a).backgroundColor);
+  expect(railBg).toBe('rgb(251, 247, 238)');
   await page.locator('.hosts').screenshot({ path: `${SHOTS}/desktop-hosts.png` });
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: `${SHOTS}/desktop-top.png` });
