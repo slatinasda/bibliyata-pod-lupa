@@ -23,7 +23,7 @@ function boot(EPISODES) {
     '/img/ep-7.webp'
   ];
   function art(i) {
-    return '<img src="' + COVERS[i] + '" width="800" height="450" alt="Постер на епизод ' + EPISODES[i].id + ': ' + EPISODES[i].question.replace(/"/g, '&quot;') + '">';
+    return '<img src="' + COVERS[i] + '" width="800" height="450" alt="Постер на епизод ' + EPISODES[i].id + ': ' + EPISODES[i].question.replace(/"/g, '&quot;') + '" loading="lazy" decoding="async">';
   }
 
   function sofiaToday() {

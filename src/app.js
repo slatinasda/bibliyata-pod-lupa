@@ -2,6 +2,7 @@ require('dotenv').config();
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
+const compression = require('compression');
 
 const publicRoutes = require('./routes/public');
 const adminAuthRoutes = require('./routes/adminAuth');
@@ -13,6 +14,7 @@ const app = express();
 // Зад прокси на Railway: взимаме истинския IP от X-Forwarded-For (нужно за лимитите по IP).
 app.set('trust proxy', 1);
 app.disable('x-powered-by');
+app.use(compression()); // по-малки страници и по-бърз сайт (Core Web Vitals)
 app.use(securityHeaders);
 
 app.use(express.json({ limit: '100kb' }));
@@ -30,8 +32,32 @@ app.use('/api', publicRoutes);
 app.use('/api/admin', adminAuthRoutes);
 app.use('/api/admin', adminDataRoutes);
 
-// Сайтът и админ панелът (/admin/) са статични файлове в public/.
-app.use(express.static(path.join(__dirname, '..', 'public')));
+// Откриваемост (SEO/GEO): началната страница се рендира със сървъра, за да виждат ботовете без JavaScript
+// програмата, структурираните данни и FAQ; robots/sitemap/llms се генерират от същите данни (src/seo.js).
+const seo = require('./seo');
+const template = seo.loadTemplate();
+const send = (type, cache) => (body) => (req, res) => {
+  res.set({ 'Content-Type': `${type}; charset=utf-8`, 'Cache-Control': cache, 'Content-Language': 'bg' });
+  res.send(typeof body === 'function' ? body() : body);
+};
+app.get('/', (req, res) => {
+  res.set({ 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'public, max-age=300', 'Content-Language': 'bg' });
+  res.send(seo.renderHome(template));
+});
+app.get('/index.html', (req, res) => res.redirect(301, '/'));
+app.get('/robots.txt', send('text/plain', 'public, max-age=3600')(() => seo.robotsTxt()));
+app.get('/sitemap.xml', send('application/xml', 'public, max-age=3600')(() => seo.sitemapXml(template.modified)));
+app.get('/llms.txt', send('text/plain', 'public, max-age=3600')(() => seo.llmsTxt()));
+app.get('/llms-full.txt', send('text/plain', 'public, max-age=3600')(() => seo.llmsFull()));
+
+// Сайтът и админ панелът (/admin/) са статични файлове в public/. Картинките се кешират за един ден (ETag при промяна).
+// "/" вече е обработен по-горе, а за /admin/ статичният сървър връща admin/index.html и пренасочва /admin към /admin/.
+app.use(express.static(path.join(__dirname, '..', 'public'), {
+  setHeaders(res, file) {
+    if (/\.(webp|png|jpe?g|svg|ico)$/i.test(file)) res.set('Cache-Control', 'public, max-age=86400');
+    else if (/\.(css|js)$/i.test(file)) res.set('Cache-Control', 'public, max-age=300');
+  },
+}));
 
 app.use('/api', (req, res) => res.status(404).json({ error: 'Not found.' }));
 

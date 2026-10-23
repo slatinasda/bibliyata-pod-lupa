@@ -19,7 +19,7 @@ test('public site loads with the season data and no console errors', async ({ pa
 
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
-  await expect(page).toHaveTitle('Библията под лупа');
+  await expect(page).toHaveTitle('Библията под лупа · Библейски разговори за трудни въпроси за Бог в София');
   await expect(page.locator('#ep-list article')).toHaveCount(7);
   await expect(page.locator('#when-topic')).not.toBeEmpty();
   await expect(page.locator('#reg-form')).toBeVisible();
