@@ -67,6 +67,14 @@ npm run test:e2e
 
 Таблиците и админът се създават сами при първия старт.
 
+### Автоматичен деплой (GitHub Actions)
+
+Всеки push в `main` пуска `.github/workflows/deploy.yml`, който изпълнява `railway up --service web --ci`. Може да се пусне и ръчно от таба Actions („Run workflow“).
+
+Нужен е GitHub secret `RAILWAY_TOKEN` (GitHub → Settings → Secrets and variables → Actions) — Railway **project token** за средата `production` (Railway → проекта → Settings → Tokens). Без него workflow-ът минава, но пропуска деплоя.
+
+Ръчен деплой от папката (`railway up --service web`) продължава да работи.
+
 ## Сигурност
 
 - Вход в админа: bcrypt, 10 опита за 15 минути от IP и 5 за акаунт, забавяне при грешка, JWT 2 часа само в таба (`sessionStorage`).
