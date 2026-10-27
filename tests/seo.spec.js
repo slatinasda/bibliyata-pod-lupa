@@ -77,7 +77,7 @@ test('JSON-LD is valid and consistent: Organization, EventSeries with 7 Events, 
   expect(html).not.toMatch(/<script type="application\/ld\+json">[^<]*<\/script>[^]*<\/script>\s*<script type="application\/ld\+json">/);
 });
 
-test('robots.txt allows every major search and AI bot, keeps only /admin/ and /api/ out', async ({ request }) => {
+test('robots.txt allows every major search and AI bot, keeps only /api/ out and does not mention admin', async ({ request }) => {
   const res = await request.get('/robots.txt');
   expect(res.headers()['content-type']).toContain('text/plain');
   const txt = await res.text();
@@ -85,7 +85,8 @@ test('robots.txt allows every major search and AI bot, keeps only /admin/ and /a
     expect(txt, bot).toContain(`User-agent: ${bot}\n`);
   }
   expect(txt).toContain('User-agent: *\nAllow: /');
-  expect(txt).toContain('Disallow: /admin/');
+  expect(txt).toContain('Disallow: /api/');
+  expect(txt).not.toMatch(/admin|админ/i);
   expect(txt).toContain(`Sitemap: ${SITE}/sitemap.xml`);
   // никой бот не е блокиран изцяло
   expect(txt).not.toMatch(/Disallow:\s*\/\s*$/m);

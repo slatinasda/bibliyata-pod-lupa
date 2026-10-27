@@ -63,7 +63,10 @@ test('domain setup: canonical + Open Graph, robots.txt and sitemap.xml', async (
   expect(og.status()).toBe(200);
   expect(og.headers()['content-type']).toContain('image/png');
   const robots = await (await request.get('/robots.txt')).text();
-  expect(robots).toContain('Disallow: /admin/');
+  expect(robots).toContain('Disallow: /api/');
+  expect(robots).not.toContain('admin');
+  // админът не се споменава в robots.txt, затова се пази от индексиране с заглавка
+  expect((await request.get('/admin/')).headers()['x-robots-tag']).toBe('noindex, nofollow');
   expect(robots).toContain('Sitemap: https://bibliatapodlupa.com/sitemap.xml');
   expect(await (await request.get('/sitemap.xml')).text()).toContain('<loc>https://bibliatapodlupa.com/</loc>');
 });

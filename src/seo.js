@@ -312,7 +312,7 @@ function renderHome(tpl, now = new Date()) {
   return h;
 }
 
-// ---- robots.txt: всички ботове и AI модели са добре дошли, само админът и API-то са извън обхвата ----
+// ---- robots.txt: всички ботове и AI модели са добре дошли, само API-то е извън обхвата ----
 const BOTS = [
   // OpenAI
   'GPTBot', 'OAI-SearchBot', 'ChatGPT-User',
@@ -333,11 +333,11 @@ const BOTS = [
 ];
 
 function robotsTxt() {
-  const rules = ['Allow: /', 'Disallow: /admin/', 'Disallow: /api/'].join('\n');
+  const rules = ['Allow: /', 'Disallow: /api/'].join('\n');
   // Всеки ботов блок има собствени правила, затова Disallow се повтаря във всеки (иначе ботът би игнорирал блока "*").
   return `# ${BRAND}: ${SITE}/
 # Всички търсачки, AI асистенти и AI модели са добре дошли да четат, индексират и цитират публичното съдържание.
-# Само админ панелът и API-то не са за ботове.
+# API адресите не са за ботове.
 # Съдържание за AI: ${SITE}/llms.txt и ${SITE}/llms-full.txt
 
 ${BOTS.map((b) => `User-agent: ${b}`).join('\n')}
