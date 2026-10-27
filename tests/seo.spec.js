@@ -99,8 +99,10 @@ test('sitemap.xml, llms.txt and llms-full.txt', async ({ request }) => {
   expect(xml).toMatch(/<lastmod>\d{4}-\d\d-\d\d<\/lastmod>/);
   expect(xml).toContain('hreflang="x-default"');
   expect((xml.match(/<image:image>/g) || []).length).toBe(12); // og + лого + 7 епизода + 3 водещи
-  expect((xml.match(/<url>/g) || []).length).toBe(2);
+  expect((xml.match(/<url>/g) || []).length).toBe(4); // начало, карта на сайта, поверителност, бисквитки
   expect(xml).toContain(`<loc>${SITE}/karta-na-sayta</loc>`);
+  expect(xml).toContain(`<loc>${SITE}/poveritelnost</loc>`);
+  expect(xml).toContain(`<loc>${SITE}/biskvitki</loc>`);
   // описание на всички секции и ключови думи в самия файл (в коментар)
   for (const id of ['nachalo', 'kakvo-e', 'vecher', 'epizodi', 'parvi-pat', 'vaprosi', 'zapishi', 'pokani', 'kontakti']) expect(xml).toContain(`${SITE}/#${id}`);
   expect(xml).toContain('Основни ключови думи:');
@@ -156,6 +158,49 @@ test('"Карта на сайта" page describes every section, episode, host, 
   await page.screenshot({ path: 'test-results/shots/sitemap-page.png', fullPage: true });
   await page.click('.sm-toc a[href="#sm-epizodi"]');
   await expect(page.locator('#sm-epizodi')).toBeInViewport();
+});
+
+test('privacy and cookies pages: indexable, linked from every footer and from both forms', async ({ page, request }) => {
+  const pages = [
+    ['/poveritelnost', 'Политика за поверителност', ['КЗЛД', 'cpdp.bg', 'Railway', 'Google Fonts', 'на преносимост', 'Последна актуализация']],
+    ['/biskvitki', 'Политика за бисквитките', ['bpl_admin_token', 'sessionStorage', 'не поставят бисквитки', 'Последна актуализация']],
+  ];
+  for (const [path, h1, words] of pages) {
+    const res = await request.get(path);
+    expect(res.status(), path).toBe(200);
+    expect(res.headers()['content-type']).toContain('text/html');
+    const html = await res.text();
+    expect(html).toContain(`<title>${h1} · Библията под лупа</title>`);
+    expect(html).toContain(`rel="canonical" href="${SITE}${path}"`);
+    expect(html).toMatch(/<meta name="description" content="[^"]{60,}">/);
+    expect(html).toContain('name="robots" content="index, follow');
+    expect(html).toContain(`<h1 class="sm-h1">${h1}</h1>`);
+    for (const w of words) expect(html, `${path}: ${w}`).toContain(w);
+    const ld = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1])['@graph'];
+    expect(ld.find((n) => n['@type'] === 'WebPage').url).toBe(`${SITE}${path}`);
+  }
+  // полетата за попълване се виждат ясно
+  expect(await (await request.get('/poveritelnost')).text()).toContain('<mark class="lg-ph">[ИМЕ НА АДМИНИСТРАТОРА]</mark>');
+
+  // футърът на всяка страница води към двете политики
+  for (const path of ['/', '/karta-na-sayta', '/poveritelnost', '/biskvitki']) {
+    const html = await (await request.get(path)).text();
+    const footer = html.slice(html.indexOf('<footer'));
+    expect(footer, path).toContain('href="/poveritelnost"');
+    expect(footer, path).toContain('href="/biskvitki"');
+  }
+  // бележката под двете форми
+  const home = await (await request.get('/')).text();
+  expect((home.match(/class="form-note">Изпращайки формата, се съгласяваш с <a href="\/poveritelnost">Политиката за поверителност<\/a>\.<\/p>/g) || []).length).toBe(2);
+
+  // кликът във футъра отваря страницата, а публичният сайт не поставя бисквитки и не пише в хранилището
+  await page.goto('/');
+  await page.locator('.site-footer a[href="/biskvitki"]').click();
+  await expect(page).toHaveURL(/\/biskvitki$/);
+  await page.locator('.site-footer a[href="/poveritelnost"]').click();
+  await expect(page.locator('h1')).toHaveText('Политика за поверителност');
+  expect(await page.context().cookies()).toEqual([]);
+  expect(await page.evaluate(() => localStorage.length + sessionStorage.length)).toBe(0);
 });
 
 test('episode covers: seven distinct 16:9 images are served', async ({ request }) => {

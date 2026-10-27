@@ -557,7 +557,7 @@ legend + * { clear: both; }
 .sm-sec h2 a:hover { color: var(--cta); }
 .sm-sec p { margin: 0 0 10px; color: var(--ink-2); line-height: 1.65; }
 .sm-sec ul { margin: 0 0 12px; padding-left: 1.2em; color: var(--ink-2); display: grid; gap: 6px; }
-.sm-sec li { line-height: 1.55; }
+.sm-sec li { line-height: 1.55; overflow-wrap: anywhere; }
 .sm-sec .sm-kw { font-size: .95rem; }
 .sm-sec .sm-kw b { color: var(--forest); }
 .sm-sec .sm-link { margin: 0; }
@@ -581,3 +581,22 @@ legend + * { clear: both; }
 .qa-toggle-body { padding: 0 28px 28px; }
 .qa-intro { margin: 0 0 18px; color: var(--ink-2); line-height: 1.6; max-width: 70ch; }
 @media (max-width: 600px) { .qa-toggle-sum { padding: 18px; gap: 12px; } .qa-toggle-body { padding: 0 14px 18px; } .qa-toggle-hint .qa-hint-closed, .qa-toggle-hint .qa-hint-open { display: none !important; } }
+
+/* Правни страници (/poveritelnost, /biskvitki), връзките към тях във футъра и бележката под формите */
+.legal-links a { color: var(--ink-2); text-underline-offset: 3px; }
+.legal-links a:hover { color: var(--cta); }
+.form-note { margin: 0; font-size: .85rem; color: var(--ink-2); line-height: 1.5; }
+.form-foot .form-note { text-align: center; }
+#ct-form .form-note { margin-top: 12px; }
+.form-note a, .lg-sec a { color: var(--cta); text-underline-offset: 3px; }
+.lg-sec { scroll-margin-top: 16px; }
+.lg-sec ul { margin-bottom: 10px; }
+.lg-sec b { color: var(--ink); }
+.lg-ph { background: #F6DFA6; color: var(--ink); padding: 0 .25em; border-radius: 4px; font-weight: 600; }
+.lg-table { overflow-x: auto; margin: 0 0 12px; }
+.lg-table table { width: 100%; border-collapse: collapse; font-size: .95rem; color: var(--ink-2); }
+.lg-table th, .lg-table td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.lg-table th { color: var(--forest); font-weight: 600; }
+.lg-table code { font-size: .9em; overflow-wrap: anywhere; }
+.lg-updated { margin: 24px 0 0; color: var(--ink-2); font-size: .95rem; }
+@media (max-width: 559px) { .lg-table table, .lg-table thead, .lg-table tbody, .lg-table tr, .lg-table th, .lg-table td { display: block; } .lg-table thead { display: none; } .lg-table td { border: 0; padding: 4px 0; } .lg-table tr { padding: 8px 0; border-bottom: 1px solid var(--line); } }

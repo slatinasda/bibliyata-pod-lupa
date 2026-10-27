@@ -4,6 +4,7 @@
 const fs = require('fs');
 const path = require('path');
 const { SEASON, EPISODES, nextEpisode, sofiaToday } = require('./episodes');
+const legal = require('./legal');
 
 const SITE = 'https://bibliatapodlupa.com';
 const BRAND = 'Библията под лупа';
@@ -362,9 +363,9 @@ function sitemapXml(modified) {
   const secs = sections();
   const imgs = allImages();
   const description = secs.map((x) => `  ${x.title} (${SITE}/#${x.id}): ${x.summary} Ключови думи: ${x.keywords.join(', ')}.`).join('\n').replace(/--/g, '-');
-  const url = (loc, prio, freq, withImages) => `  <url>
+  const url = (loc, prio, freq, withImages, lastmod = modified) => `  <url>
     <loc>${loc}</loc>
-    <lastmod>${modified}</lastmod>
+    <lastmod>${lastmod}</lastmod>
     <changefreq>${freq}</changefreq>
     <priority>${prio}</priority>
     <xhtml:link rel="alternate" hreflang="bg" href="${loc}"/>
@@ -374,7 +375,8 @@ ${withImages ? imgs.map((i) => `    <image:image><image:loc>${i.loc}</image:loc>
 <!--
   ${BRAND} (${BRAND_EN}): карта на съдържанието на сайта ${SITE}/
   Сайтът е една страница със секции (адресите със # са секции на началната страница), плюс страницата ${SITEMAP_PAGE}
-  с пълно описание на всички секции, епизоди, водещи, въпроси и ключови думи.
+  с пълно описание на всички секции, епизоди, водещи, въпроси и ключови думи, и правните страници
+  ${legal.PAGES.map((p) => `${p.title} (${SITE}${p.path})`).join(' и ')}.
   Секции на началната страница:
 ${description}
   Основни ключови думи: ${KEYWORDS.join(', ')}.
@@ -383,6 +385,7 @@ ${description}
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 ${url(`${SITE}/`, '1.0', 'weekly', true)}
 ${url(SITEMAP_PAGE, '0.8', 'weekly', false)}
+${legal.PAGES.map((p) => url(`${SITE}${p.path}`, '0.3', 'yearly', false, legal.UPDATED)).join('\n')}
 </urlset>
 `;
 }
@@ -410,37 +413,8 @@ function sitemapPageHtml(modified) {
       { '@type': 'ItemList', name: `Секции на ${BRAND}`, numberOfItems: secs.length, itemListElement: secs.map((x, i) => ({ '@type': 'ListItem', position: i + 1, name: x.title, url: `${SITE}/#${x.id}` })) },
     ],
   };
-  return `<!doctype html>
-<html lang="bg">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>${esc(title)}</title>
-<meta name="description" content="${esc(desc)}">
-<meta name="keywords" content="${esc(KEYWORDS.join(', '))}">
-<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
-<meta name="theme-color" content="#F4EDDF">
-<link rel="canonical" href="${SITEMAP_PAGE}">
-<link rel="alternate" hreflang="bg" href="${SITEMAP_PAGE}">
-<link rel="alternate" hreflang="x-default" href="${SITEMAP_PAGE}">
-<meta property="og:title" content="${esc(title)}">
-<meta property="og:description" content="${esc(desc)}">
-<meta property="og:type" content="website">
-<meta property="og:locale" content="bg_BG">
-<meta property="og:url" content="${SITEMAP_PAGE}">
-<meta property="og:site_name" content="${BRAND}">
-<meta property="og:image" content="${SITE}/img/og.png">
-<link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,500;0,7..72,600;0,7..72,700;1,7..72,500&family=Onest:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="/styles.css">
-<script type="application/ld+json">${safeJson(graph)}</script>
-</head>
-<body>
-<header class="site-header sm-header"><div class="wrap nav"><a class="logo logo-sm" href="/" aria-label="${BRAND}, начало"><img class="bpl-logo" src="/img/logo.webp" alt="" width="800" height="296" style="width:136px" decoding="async"></a><a class="sm-back" href="/">← Към сайта</a></div></header>
+  return `${subPageHead({ url: SITEMAP_PAGE, title, desc, graph })}
+${subPageHeader()}
 <main id="main" class="sm-page">
   <div class="wrap">
     <div class="sec-head">
@@ -464,11 +438,96 @@ ${body}
     </section>
   </div>
 </main>
-<footer class="site-footer"><div class="wrap"><div class="legal"><span>© 2026 ${BRAND}</span><span>Всяка събота от ${SEASON.time} · ${VENUE}, ${STREET}</span></div></div></footer>
+${subPageFooter()}
 </body>
 </html>
 `;
 }
+
+// ---- общи части на вътрешните страници (Карта на сайта, Поверителност, Бисквитки) -----------------------
+function subPageHead({ url, title, desc, graph }) {
+  return `<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>${esc(title)}</title>
+<meta name="description" content="${esc(desc)}">
+<meta name="keywords" content="${esc(KEYWORDS.join(', '))}">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="theme-color" content="#F4EDDF">
+<link rel="canonical" href="${url}">
+<link rel="alternate" hreflang="bg" href="${url}">
+<link rel="alternate" hreflang="x-default" href="${url}">
+<meta property="og:title" content="${esc(title)}">
+<meta property="og:description" content="${esc(desc)}">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="bg_BG">
+<meta property="og:url" content="${url}">
+<meta property="og:site_name" content="${BRAND}">
+<meta property="og:image" content="${SITE}/img/og.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,500;0,7..72,600;0,7..72,700;1,7..72,500&family=Onest:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<script type="application/ld+json">${safeJson(graph)}</script>
+</head>
+<body>`;
+}
+
+const subPageHeader = () => `<header class="site-header sm-header"><div class="wrap nav"><a class="logo logo-sm" href="/" aria-label="${BRAND}, начало"><img class="bpl-logo" src="/img/logo.webp" alt="" width="800" height="296" style="width:136px" decoding="async"></a><a class="sm-back" href="/">← Към сайта</a></div></header>`;
+
+// Връзките към правните страници са и във футъра на началната страница (public/index.html).
+const legalLinksHtml = () => `<span class="legal-links"><a href="/karta-na-sayta">Карта на сайта</a> · ${legal.PAGES.map((p) => `<a href="${p.path}">${p.path === legal.COOKIES.path ? 'Бисквитки' : esc(p.title)}</a>`).join(' · ')}</span>`;
+
+const subPageFooter = () => `<footer class="site-footer"><div class="wrap"><div class="legal"><span>© 2026 ${BRAND}</span>${legalLinksHtml()}<span>Всяка събота от ${SEASON.time} · ${VENUE}, ${STREET}</span></div></div></footer>`;
+
+// ---- Политика за поверителност и Политика за бисквитките (текстът е в src/legal.js) -------------------
+// Полетата за попълване ([ИМЕ НА АДМИНИСТРАТОРА] и т.н.) се оцветяват, за да се виждат, докато не бъдат заменени.
+const markPlaceholders = (html) => html.replace(/\[[А-ЯA-Z][^\]<]*\]/g, (m) => `<mark class="lg-ph">${m}</mark>`);
+
+function legalPageHtml(pg) {
+  const url = `${SITE}${pg.path}`;
+  const title = `${pg.title} · ${BRAND}`;
+  const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      { '@type': 'WebPage', '@id': `${url}#webpage`, url, name: title, description: pg.description, inLanguage: 'bg-BG', isPartOf: { '@id': `${SITE}/#website` }, publisher: { '@id': `${SITE}/#organization` }, dateModified: legal.UPDATED },
+      { '@type': 'BreadcrumbList', itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Начало', item: `${SITE}/` },
+        { '@type': 'ListItem', position: 2, name: pg.title, item: url },
+      ] },
+    ],
+  };
+  const body = pg.sections.map((x) => `      <section class="sm-sec lg-sec" id="${x.id}" aria-labelledby="h-${x.id}">
+        <h2 id="h-${x.id}">${esc(x.title)}</h2>
+${markPlaceholders(x.html)}
+      </section>`).join('\n');
+  return `${subPageHead({ url, title, desc: pg.description, graph })}
+${subPageHeader()}
+<main id="main" class="sm-page lg-page">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">${esc(pg.eyebrow)}</p>
+      <h1 class="sm-h1">${esc(pg.title)}</h1>
+      <p>${esc(pg.intro)}</p>
+    </div>
+    <nav class="sm-toc" aria-label="Съдържание"><ol>${pg.sections.map((x) => `<li><a href="#${x.id}">${esc(x.title.replace(/^\d+\.\s*/, ''))}</a></li>`).join('')}</ol></nav>
+${body}
+    <p class="lg-updated">Последна актуализация: <time datetime="${legal.UPDATED}">${legal.UPDATED_TEXT}</time></p>
+  </div>
+</main>
+${subPageFooter()}
+</body>
+</html>
+`;
+}
+
+const privacyPageHtml = () => legalPageHtml(legal.PRIVACY);
+const cookiesPageHtml = () => legalPageHtml(legal.COOKIES);
 
 // ---- llms.txt (кратко) и llms-full.txt (пълно) ----------------------------------------------------------
 function llmsTxt() {
@@ -547,5 +606,5 @@ ${BRAND_EN} (Bulgarian: "${BRAND}") is a community and interactive Bible experie
 }
 
 module.exports = {
-  SITE, TITLE, DESCRIPTION, KEYWORDS, SITEMAP_PAGE, sections, loadTemplate, renderHome, robotsTxt, sitemapXml, sitemapPageHtml, llmsTxt, llmsFull, jsonLd, faq,
+  SITE, TITLE, DESCRIPTION, KEYWORDS, SITEMAP_PAGE, sections, loadTemplate, renderHome, robotsTxt, sitemapXml, sitemapPageHtml, privacyPageHtml, cookiesPageHtml, llmsTxt, llmsFull, jsonLd, faq,
 };
