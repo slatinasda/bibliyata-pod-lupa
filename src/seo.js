@@ -232,6 +232,8 @@ function jsonLd(modified) {
         description: 'Общност в София за открити разговори за трудни въпроси за Бог, с изследване на Библията в контекста ѝ.',
         sameAs: Object.values(SOCIAL),
         areaServed: { '@type': 'City', name: 'София' },
+        email: legal.CONTACT_EMAIL,
+        contactPoint: { '@type': 'ContactPoint', contactType: 'customer support', email: legal.CONTACT_EMAIL, availableLanguage: 'bg' },
       },
       { '@type': 'WebSite', '@id': web, url: `${SITE}/`, name: BRAND, inLanguage: 'bg-BG', publisher: { '@id': org } },
       {
@@ -428,6 +430,12 @@ ${body}
       <h2 id="sm-kw">Основни ключови думи</h2>
       <p>${esc(KEYWORDS.join(', '))}.</p>
     </section>
+    <section class="sm-sec" aria-labelledby="sm-legal">
+      <h2 id="sm-legal">Правна информация</h2>
+      <ul>
+${legal.PAGES.map((p) => `        <li><a href="${p.path}">${esc(p.title)}</a>: ${esc(p.summary)}</li>`).join('\n')}
+      </ul>
+    </section>
     <section class="sm-sec" aria-labelledby="sm-files">
       <h2 id="sm-files">Файлове за търсачки и AI системи</h2>
       <ul>
@@ -486,8 +494,6 @@ const legalLinksHtml = () => `<span class="legal-links"><a href="/karta-na-sayta
 const subPageFooter = () => `<footer class="site-footer"><div class="wrap"><div class="legal"><span>© 2026 ${BRAND}</span>${legalLinksHtml()}<span>Всяка събота от ${SEASON.time} · ${VENUE}, ${STREET}</span></div></div></footer>`;
 
 // ---- Политика за поверителност и Политика за бисквитките (текстът е в src/legal.js) -------------------
-// Полетата за попълване ([ИМЕ НА АДМИНИСТРАТОРА] и т.н.) се оцветяват, за да се виждат, докато не бъдат заменени.
-const markPlaceholders = (html) => html.replace(/\[[А-ЯA-Z][^\]<]*\]/g, (m) => `<mark class="lg-ph">${m}</mark>`);
 
 function legalPageHtml(pg) {
   const url = `${SITE}${pg.path}`;
@@ -504,7 +510,7 @@ function legalPageHtml(pg) {
   };
   const body = pg.sections.map((x) => `      <section class="sm-sec lg-sec" id="${x.id}" aria-labelledby="h-${x.id}">
         <h2 id="h-${x.id}">${esc(x.title)}</h2>
-${markPlaceholders(x.html)}
+${x.html}
       </section>`).join('\n');
   return `${subPageHead({ url, title, desc: pg.description, graph })}
 ${subPageHeader()}
@@ -547,6 +553,10 @@ ${sections().map((x) => `- [${x.title}](${SITE}/#${x.id}): ${x.summary}`).join('
 - [Пълно описание в текст](${SITE}/llms-full.txt): цялото съдържание на сайта в един файл
 - [Карта на сайта](${SITE}/sitemap.xml)
 - Разрешено е да четете, обобщавате и цитирате публичното съдържание, с препратка към ${SITE}/.
+
+## Правна информация
+${legal.PAGES.map((p) => `- [${p.title}](${SITE}${p.path}): ${p.summary}`).join('\n')}
+- Контакт: ${legal.CONTACT_EMAIL}
 
 ## Социални мрежи
 - [Facebook](${SOCIAL.facebook})
@@ -599,6 +609,10 @@ ${faq().map((x) => `### ${x.q}\n${x.a}`).join('\n\n')}
 Facebook: ${SOCIAL.facebook}
 Instagram: ${SOCIAL.instagram}
 YouTube: ${SOCIAL.youtube}
+Имейл: ${legal.CONTACT_EMAIL}
+
+## Правна информация
+${legal.PAGES.map((p) => `- ${p.title} (${SITE}${p.path}): ${p.summary}`).join('\n')}
 
 ## English summary
 ${BRAND_EN} (Bulgarian: "${BRAND}") is a community and interactive Bible experience in Sofia, Bulgaria. Over ${EPISODES.length} Saturday evenings (18:00, ${FIRST.date} to ${LAST.date}) at ${VENUE}, ${STREET}, Sofia, people ask hard questions about God, read the Bible in its historical context and talk openly. Participants hold up cards (Yes / No / Maybe / Comment), so nobody has to speak in front of the room. It is not a sermon or a lecture. Entry is free, registration is optional, and believers, doubters and the curious are all welcome.

@@ -127,7 +127,7 @@ test('"Карта на сайта" page describes every section, episode, host, 
   expect(html).toContain('<title>Карта на сайта · Библията под лупа');
   expect(html).toContain(`rel="canonical" href="${SITE}/karta-na-sayta"`);
   // всичките 9 секции със заглавие, описание, ключови думи и връзка
-  expect((html.match(/class="sm-sec"/g) || []).length).toBe(11); // 9 секции + ключови думи + файлове
+  expect((html.match(/class="sm-sec"/g) || []).length).toBe(12); // 9 секции + ключови думи + правна информация + файлове
   for (const id of ['nachalo', 'kakvo-e', 'vecher', 'epizodi', 'parvi-pat', 'vaprosi', 'zapishi', 'pokani', 'kontakti']) {
     expect(html).toContain(`href="/#${id}"`);
   }
@@ -150,6 +150,16 @@ test('"Карта на сайта" page describes every section, episode, host, 
   const llms = await (await request.get('/llms.txt')).text();
   expect(llms).toContain('## Секции на сайта');
   expect(llms).toContain(`${SITE}/karta-na-sayta`);
+  // правна информация: на картата, в llms.txt / llms-full.txt и имейл в Organization
+  expect(html).toContain('href="/poveritelnost"');
+  expect(html).toContain('href="/biskvitki"');
+  for (const f of [llms, await (await request.get('/llms-full.txt')).text()]) {
+    expect(f).toContain('## Правна информация');
+    expect(f).toContain(`${SITE}/poveritelnost`);
+    expect(f).toContain(`${SITE}/biskvitki`);
+  }
+  const org = g.find((n) => n['@type'] === 'Organization');
+  expect(org.contactPoint.email).toBe('contact@bibliatapodlupa.com');
 
   // визуално: страницата се чете добре
   await page.setViewportSize({ width: 1280, height: 900 });
@@ -163,7 +173,7 @@ test('"Карта на сайта" page describes every section, episode, host, 
 test('privacy and cookies pages: indexable, linked from every footer and from both forms', async ({ page, request }) => {
   const pages = [
     ['/poveritelnost', 'Политика за поверителност', ['КЗЛД', 'cpdp.bg', 'Railway', 'Google Fonts', 'на преносимост', 'Последна актуализация']],
-    ['/biskvitki', 'Политика за бисквитките', ['bpl_admin_token', 'sessionStorage', 'не поставят бисквитки', 'Последна актуализация']],
+    ['/biskvitki', 'Политика за бисквитките', ['не поставят бисквитки', 'contact@bibliatapodlupa.com', 'Последна актуализация']],
   ];
   for (const [path, h1, words] of pages) {
     const res = await request.get(path);
@@ -179,8 +189,13 @@ test('privacy and cookies pages: indexable, linked from every footer and from bo
     const ld = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1])['@graph'];
     expect(ld.find((n) => n['@type'] === 'WebPage').url).toBe(`${SITE}${path}`);
   }
-  // полетата за попълване се виждат ясно
-  expect(await (await request.get('/poveritelnost')).text()).toContain('<mark class="lg-ph">[ИМЕ НА АДМИНИСТРАТОРА]</mark>');
+  // окончателен текст: без полета за попълване и без споменаване на админ панела
+  for (const path of ['/poveritelnost', '/biskvitki']) {
+    const html = await (await request.get(path)).text();
+    const main = html.slice(html.indexOf('<main'), html.indexOf('</main>'));
+    expect(main, path).not.toMatch(/\[|админ(?!истратор)|admin(?!istrator)|bpl_/i);
+    expect(main, path).toContain('href="mailto:contact@bibliatapodlupa.com"');
+  }
 
   // футърът на всяка страница води към двете политики
   for (const path of ['/', '/karta-na-sayta', '/poveritelnost', '/biskvitki']) {

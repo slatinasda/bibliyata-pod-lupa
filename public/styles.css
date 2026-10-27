@@ -592,7 +592,6 @@ legend + * { clear: both; }
 .lg-sec { scroll-margin-top: 16px; }
 .lg-sec ul { margin-bottom: 10px; }
 .lg-sec b { color: var(--ink); }
-.lg-ph { background: #F6DFA6; color: var(--ink); padding: 0 .25em; border-radius: 4px; font-weight: 600; }
 .lg-table { overflow-x: auto; margin: 0 0 12px; }
 .lg-table table { width: 100%; border-collapse: collapse; font-size: .95rem; color: var(--ink-2); }
 .lg-table th, .lg-table td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
