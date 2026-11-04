@@ -601,8 +601,8 @@ legend + * { clear: both; }
 /* Видео от епизод: бутон върху картата, бутон в hero и прозорец */
 .ep-art { position: relative; }
 .ep-play { position: absolute; inset: 0; width: 100%; border: 0; padding: 0; cursor: pointer; display: grid; place-items: center; background: rgba(20,58,64,.22); }
-.ep-play { background: transparent; }
-.ep-play svg { width: 46px; height: 46px; padding: 12px 9px 12px 15px; position: absolute; right: 10px; bottom: 10px; box-sizing: border-box; border-radius: 50%; background: var(--cta); color: #fff; box-shadow: 0 8px 22px -6px rgba(0,0,0,.55); transition: transform .2s ease, background .2s ease; }
+.ep-play { background: rgba(20,58,64,.18); }
+.ep-play svg { width: 58px; height: 58px; padding: 15px 12px 15px 19px; box-sizing: border-box; border-radius: 50%; background: var(--cta); color: #fff; box-shadow: 0 8px 22px -6px rgba(0,0,0,.55); transition: transform .2s ease, background .2s ease; }
 .ep-play:hover svg { background: var(--cta-hover); transform: scale(1.08); }
 .ep-play:focus-visible { outline: 3px solid #F5A33C; outline-offset: -6px; }
 .btn-watch { display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 22px; border-radius: 999px; border: 2px solid var(--cta); background: transparent; color: var(--cta-hover); font: 700 1rem var(--f-body); cursor: pointer; }
