@@ -27,6 +27,12 @@ for (const [name, viewport] of [['desktop', { width: 1440, height: 900 }], ['mob
       await expect(dlg).toBeHidden();
       await expect(dlg.locator('iframe')).toHaveCount(0);
 
+      // плейър в страницата
+      await page.locator('#player').scrollIntoViewIfNeeded();
+      await page.locator('#player .player-play').click();
+      await expect(page.locator('#player iframe')).toHaveAttribute('src', new RegExp('youtube-nocookie[.]com/embed/' + ID));
+      await expect(page.getByText('Минал', { exact: true })).toHaveCount(0);
+
       // hero бутон
       await page.locator('.btn-watch').scrollIntoViewIfNeeded();
       await page.locator('.btn-watch').click();

@@ -86,12 +86,12 @@ function boot(EPISODES) {
   list.innerHTML = EPISODES.map(function (ep, i) {
     var isNext = next && ep.id === next.id, isPast = ep.date < today;
     var cls = 'ep' + (isNext ? ' is-next' : '') + (isPast ? ' is-past' : '');
-    var badge = isNext ? '<span class="ep-badge">Следващ</span>' : isPast ? '<span class="ep-badge">Минал</span>' : '';
+    var badge = isNext ? '<span class="ep-badge">Следващ</span>' : '';
     var action = isPast
       ? ''
       : '<a class="ep-go" href="#zapishi" data-ep-pick="' + ep.id + '" aria-label="Запази място за епизод ' + ep.id + '"><svg aria-hidden="true"><use href="#i-arrow"/></svg></a>';
     return '<article class="' + cls + '" aria-label="Епизод ' + ep.id + (isNext ? ', следващ' : '') + '">' +
-      '<div class="ep-art">' + art(i) + (ep.video ? '<button class="ep-play" type="button" data-video="' + ep.video.id + '" aria-label="Пусни видеото от Епизод ' + ep.id + '"><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M8 5.5v13l11-6.5z"/></svg></button>' : '') + '</div>' + badge +
+      '<div class="ep-art">' + (ep.video ? '<img src="/img/yt-' + ep.video.id + '.webp" width="1280" height="720" alt="Корица на видеото от епизод ' + ep.id + '" loading="lazy" decoding="async">' : art(i)) + (ep.video ? '<button class="ep-play" type="button" data-video="' + ep.video.id + '" aria-label="Пусни видеото от Епизод ' + ep.id + '"><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M8 5.5v13l11-6.5z"/></svg></button>' : '') + '</div>' + badge +
       '<div class="ep-body"><span class="ep-no">Епизод ' + pad(ep.id) + '</span>' +
       '<h3>' + ep.question + (ep.final ? '<span class="ep-final">' + ep.final + '</span>' : '') + '</h3>' +
       '<div class="ep-foot"><span class="ep-date"><b>' + dm(ep.date) + ', събота</b>' + (ep.id === 7 ? 'Мирослав Милков, Стоян Петков' : ep.host) + '</span>' + action + '</div></div></article>';
@@ -111,6 +111,18 @@ function boot(EPISODES) {
     f.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen';
     f.allowFullscreen = true; f.referrerPolicy = 'strict-origin-when-cross-origin';
     frame.innerHTML = ''; frame.appendChild(f); dlg.showModal();
+  });
+  // Видео директно в страницата: корицата се заменя с плейъра на мястото си
+  var pl = document.getElementById('player');
+  if (pl) pl.querySelector('.player-play').addEventListener('click', function () {
+    var ep = EPISODES.find(function (x) { return x.video && x.video.id === pl.getAttribute('data-yt'); });
+    if (!ep) return;
+    var f = document.createElement('iframe');
+    f.src = 'https://www.youtube-nocookie.com/embed/' + ep.video.id + '?autoplay=1&rel=0&modestbranding=1&playsinline=1';
+    f.title = 'Епизод ' + ep.id + ': ' + ep.question;
+    f.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen';
+    f.allowFullscreen = true; f.referrerPolicy = 'strict-origin-when-cross-origin';
+    pl.innerHTML = ''; pl.classList.add('is-playing'); pl.appendChild(f); f.focus();
   });
   document.getElementById('vclose').addEventListener('click', closeVideo);
   dlg.addEventListener('click', function (e) { if (e.target === dlg) closeVideo(); });

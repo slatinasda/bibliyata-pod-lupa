@@ -317,8 +317,6 @@ a { color: inherit; }
 .ep.is-next .ep-go { background: var(--cta); border-color: var(--cta); color: #fff; }
 .ep.is-next .ep-go:hover { background: var(--cta-hover); }
 .ep-badge { position: absolute; top: 10px; right: 10px; background: var(--cta); color: #fff; font: 700 .72rem/1 var(--f-body); letter-spacing: .14em; text-transform: uppercase; padding: 7px 10px; border-radius: 6px; }
-.ep.is-past { opacity: .78; }
-.ep.is-past .ep-badge { background: var(--forest); }
 .ep-note { margin-top: 18px; color: var(--forest-muted); font-size: .95rem; }
 .ep-note .hand { font-size: 1.35rem; color: var(--sand); }
 
@@ -603,7 +601,8 @@ legend + * { clear: both; }
 /* Видео от епизод: бутон върху картата, бутон в hero и прозорец */
 .ep-art { position: relative; }
 .ep-play { position: absolute; inset: 0; width: 100%; border: 0; padding: 0; cursor: pointer; display: grid; place-items: center; background: rgba(20,58,64,.22); }
-.ep-play svg { width: 64px; height: 64px; padding: 17px 13px 17px 21px; box-sizing: border-box; border-radius: 50%; background: var(--cta); color: #fff; box-shadow: 0 8px 22px -6px rgba(0,0,0,.55); transition: transform .2s ease, background .2s ease; }
+.ep-play { background: transparent; }
+.ep-play svg { width: 46px; height: 46px; padding: 12px 9px 12px 15px; position: absolute; right: 10px; bottom: 10px; box-sizing: border-box; border-radius: 50%; background: var(--cta); color: #fff; box-shadow: 0 8px 22px -6px rgba(0,0,0,.55); transition: transform .2s ease, background .2s ease; }
 .ep-play:hover svg { background: var(--cta-hover); transform: scale(1.08); }
 .ep-play:focus-visible { outline: 3px solid #F5A33C; outline-offset: -6px; }
 .btn-watch { display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 22px; border-radius: 999px; border: 2px solid var(--cta); background: transparent; color: var(--cta-hover); font: 700 1rem var(--f-body); cursor: pointer; }
@@ -616,3 +615,11 @@ legend + * { clear: both; }
 .vclose { position: absolute; top: -48px; right: 0; width: 44px; height: 44px; border-radius: 50%; border: 0; background: #FBF7EE; color: #18261F; cursor: pointer; display: grid; place-items: center; }
 .vclose svg { width: 22px; height: 22px; }
 .vclose:focus-visible { outline: 3px solid #F5A33C; outline-offset: 2px; }
+
+/* Плейър в страницата */
+.player { position: relative; aspect-ratio: 16 / 9; margin-top: clamp(20px, 3vw, 32px); border-radius: 16px; overflow: hidden; background: #000; box-shadow: 0 26px 48px -28px rgba(24,38,31,.8); }
+.player img, .player iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; object-fit: cover; }
+.player-play { position: absolute; inset: 0; width: 100%; border: 0; padding: 0; cursor: pointer; display: grid; place-items: center; background: linear-gradient(rgba(20,58,64,0), rgba(20,58,64,.28)); }
+.player-play svg { width: clamp(68px, 8vw, 92px); height: clamp(68px, 8vw, 92px); padding: 22px 18px 22px 27px; box-sizing: border-box; border-radius: 50%; background: var(--cta); color: #fff; box-shadow: 0 10px 28px -6px rgba(0,0,0,.6); transition: transform .2s ease, background .2s ease; }
+.player-play:hover svg { background: var(--cta-hover); transform: scale(1.08); }
+.player-play:focus-visible { outline: 3px solid #F5A33C; outline-offset: -8px; }
