@@ -598,10 +598,10 @@ legend + * { clear: both; }
 .lg-updated { margin: 24px 0 0; color: var(--ink-2); font-size: .95rem; }
 @media (max-width: 559px) { .lg-table table, .lg-table thead, .lg-table tbody, .lg-table tr, .lg-table th, .lg-table td { display: block; } .lg-table thead { display: none; } .lg-table td { border: 0; padding: 4px 0; } .lg-table tr { padding: 8px 0; border-bottom: 1px solid var(--line); } }
 
-/* Видео от епизод: червен play бутон (като в YouTube) на мястото на премахнатия текст върху корицата */
+/* Видео от епизод: червен play бутон (като в YouTube), по средата на корицата */
 .ep-art { position: relative; }
 .ep-play, .player-play { position: absolute; inset: 0; width: 100%; border: 0; padding: 0; cursor: pointer; background: transparent; color: #F00; }
-.ep-play svg, .player-play svg { position: absolute; left: 29%; top: 58%; width: clamp(54px, 11%, 100px); height: auto; aspect-ratio: 68 / 48; transform: translate(-50%, -50%); filter: drop-shadow(0 6px 14px rgba(0,0,0,.35)); transition: transform .2s ease, color .2s ease; }
+.ep-play svg, .player-play svg { position: absolute; left: 50%; top: 50%; width: clamp(54px, 11%, 100px); height: auto; aspect-ratio: 68 / 48; transform: translate(-50%, -50%); filter: drop-shadow(0 6px 14px rgba(0,0,0,.35)); transition: transform .2s ease, color .2s ease; }
 .ep-play:hover svg, .player-play:hover svg { color: #C00; transform: translate(-50%, -50%) scale(1.08); }
 .ep-play:focus-visible, .player-play:focus-visible { outline: 3px solid #F5A33C; outline-offset: -6px; }
 .btn-watch { display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 22px; border-radius: 999px; border: 2px solid var(--cta); background: transparent; color: var(--cta-hover); font: 700 1rem var(--f-body); cursor: pointer; }
