@@ -86,30 +86,35 @@ function boot(EPISODES) {
   list.innerHTML = EPISODES.map(function (ep, i) {
     var isNext = next && ep.id === next.id, isPast = ep.date < today;
     var cls = 'ep' + (isNext ? ' is-next' : '') + (isPast ? ' is-past' : '');
-    var badge = ep.video ? '<a class="ep-badge ep-watch" href="#gledai" data-watch="1">Гледай</a>' : isNext ? '<span class="ep-badge">Следващ</span>' : isPast ? '<span class="ep-badge">Минал</span>' : '';
+    var badge = isNext ? '<span class="ep-badge">Следващ</span>' : isPast ? '<span class="ep-badge">Минал</span>' : '';
     var action = isPast
       ? ''
       : '<a class="ep-go" href="#zapishi" data-ep-pick="' + ep.id + '" aria-label="Запази място за епизод ' + ep.id + '"><svg aria-hidden="true"><use href="#i-arrow"/></svg></a>';
     return '<article class="' + cls + '" aria-label="Епизод ' + ep.id + (isNext ? ', следващ' : '') + '">' +
-      '<div class="ep-art">' + art(i) + '</div>' + badge +
+      '<div class="ep-art">' + art(i) + (ep.video ? '<button class="ep-play" type="button" data-video="' + ep.video.id + '" aria-label="Пусни видеото от Епизод ' + ep.id + '"><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M8 5.5v13l11-6.5z"/></svg></button>' : '') + '</div>' + badge +
       '<div class="ep-body"><span class="ep-no">Епизод ' + pad(ep.id) + '</span>' +
       '<h3>' + ep.question + (ep.final ? '<span class="ep-final">' + ep.final + '</span>' : '') + '</h3>' +
       '<div class="ep-foot"><span class="ep-date"><b>' + dm(ep.date) + ', събота</b>' + (ep.id === 7 ? 'Мирослав Милков, Стоян Петков' : ep.host) + '</span>' + action + '</div></div></article>';
   }).join('');
 
-  // Видео: показва се само ако епизодът има запис; YouTube се зарежда едва след клик (nocookie, без проследяване преди това)
-  var vid = EPISODES.find(function (e) { return e.video; });
-  if (vid) {
-    var box = document.getElementById('video');
-    document.getElementById('video-play').addEventListener('click', function () {
-      var f = document.createElement('iframe');
-      f.src = 'https://www.youtube-nocookie.com/embed/' + vid.video.id + '?autoplay=1&rel=0';
-      f.title = 'Епизод ' + vid.id + ': ' + vid.question;
-      f.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen';
-      f.allowFullscreen = true; f.referrerPolicy = 'strict-origin-when-cross-origin';
-      box.innerHTML = ''; box.classList.add('is-playing'); box.appendChild(f); f.focus();
-    });
-  }
+  // Видео в прозорец (<dialog>): YouTube (nocookie) се зарежда чак при клик; затварянето маха iframe-а и спира звука
+  var dlg = document.getElementById('vdlg'), frame = document.getElementById('vframe');
+  function closeVideo() { frame.innerHTML = ''; if (dlg.open) dlg.close(); }
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-video]');
+    if (!t || !dlg.showModal) return;
+    var ep = EPISODES.find(function (x) { return x.video && x.video.id === t.getAttribute('data-video'); });
+    if (!ep) return;
+    var f = document.createElement('iframe');
+    f.src = 'https://www.youtube-nocookie.com/embed/' + ep.video.id + '?autoplay=1&rel=0&modestbranding=1&playsinline=1';
+    f.title = 'Епизод ' + ep.id + ': ' + ep.question;
+    f.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen';
+    f.allowFullscreen = true; f.referrerPolicy = 'strict-origin-when-cross-origin';
+    frame.innerHTML = ''; frame.appendChild(f); dlg.showModal();
+  });
+  document.getElementById('vclose').addEventListener('click', closeVideo);
+  dlg.addEventListener('click', function (e) { if (e.target === dlg) closeVideo(); });
+  dlg.addEventListener('close', function () { frame.innerHTML = ''; });
 
   // Bring the next episode into view inside the row
   if (next) {

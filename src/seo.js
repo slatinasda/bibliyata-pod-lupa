@@ -287,10 +287,10 @@ function episodesHtml(today, next) {
   return EPISODES.map((ep) => {
     const isNext = next && ep.id === next.id, isPast = ep.date < today;
     const cls = 'ep' + (isNext ? ' is-next' : '') + (isPast ? ' is-past' : '');
-    const badge = ep.video ? '<a class="ep-badge ep-watch" href="#gledai" data-watch="1">Гледай</a>' : isNext ? '<span class="ep-badge">Следващ</span>' : isPast ? '<span class="ep-badge">Минал</span>' : '';
+    const badge = isNext ? '<span class="ep-badge">Следващ</span>' : isPast ? '<span class="ep-badge">Минал</span>' : '';
     const action = isPast ? '' : `<a class="ep-go" href="#zapishi" data-ep-pick="${ep.id}" aria-label="Запази място за епизод ${ep.id}"><svg aria-hidden="true"><use href="#i-arrow"/></svg></a>`;
     return `<article class="${cls}" aria-label="Епизод ${ep.id}${isNext ? ', следващ' : ''}">` +
-      `<div class="ep-art"><img src="/img/ep-${ep.id}.webp" width="800" height="450" alt="Постер на епизод ${ep.id}: ${esc(ep.question)}" loading="lazy" decoding="async"></div>${badge}` +
+      `<div class="ep-art"><img src="/img/ep-${ep.id}.webp" width="800" height="450" alt="Постер на епизод ${ep.id}: ${esc(ep.question)}" loading="lazy" decoding="async">${ep.video ? `<button class="ep-play" type="button" data-video="${ep.video.id}" aria-label="Пусни видеото от Епизод ${ep.id}"><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M8 5.5v13l11-6.5z"/></svg></button>` : ''}</div>${badge}` +
       `<div class="ep-body"><span class="ep-no">Епизод ${pad2(ep.id)}</span>` +
       `<h3>${esc(ep.question)}${ep.final ? `<span class="ep-final">${esc(ep.final)}</span>` : ''}</h3>` +
       `<div class="ep-foot"><span class="ep-date"><b>${dm(ep.date)}, събота</b>${esc(hostsOf(ep))}</span>${action}</div></div></article>`;
