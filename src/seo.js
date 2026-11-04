@@ -265,6 +265,14 @@ function jsonLd(modified) {
       },
       ...persons,
       ...events,
+      ...EPISODES.filter((e) => e.video).map((e) => ({
+        '@type': 'VideoObject', '@id': `${SITE}/#video-${e.id}`,
+        name: `${BRAND} · Епизод ${e.id}: ${e.question}`,
+        description: `Запис на Епизод ${e.id} от Сезон ${SEASON.number} „${SEASON.title}“ на ${BRAND}: „${e.question}“. Води ${e.host}.`,
+        thumbnailUrl: [`${SITE}/img/ep-${e.id}.webp`], uploadDate: e.video.uploaded, duration: e.video.duration,
+        contentUrl: `https://www.youtube.com/watch?v=${e.video.id}`, embedUrl: `https://www.youtube-nocookie.com/embed/${e.video.id}`,
+        inLanguage: 'bg', isFamilyFriendly: true, publisher: { '@id': org }, about: { '@id': `${SITE}/#episode-${e.id}` },
+      })),
       {
         '@type': 'FAQPage', '@id': `${SITE}/#faq`, inLanguage: 'bg-BG', mainEntity: faq().map((x) => ({
           '@type': 'Question', name: x.q, acceptedAnswer: { '@type': 'Answer', text: x.a },
@@ -279,7 +287,7 @@ function episodesHtml(today, next) {
   return EPISODES.map((ep) => {
     const isNext = next && ep.id === next.id, isPast = ep.date < today;
     const cls = 'ep' + (isNext ? ' is-next' : '') + (isPast ? ' is-past' : '');
-    const badge = isNext ? '<span class="ep-badge">Следващ</span>' : isPast ? '<span class="ep-badge">Минал</span>' : '';
+    const badge = ep.video ? '<a class="ep-badge ep-watch" href="#gledai" data-watch="1">Гледай</a>' : isNext ? '<span class="ep-badge">Следващ</span>' : isPast ? '<span class="ep-badge">Минал</span>' : '';
     const action = isPast ? '' : `<a class="ep-go" href="#zapishi" data-ep-pick="${ep.id}" aria-label="Запази място за епизод ${ep.id}"><svg aria-hidden="true"><use href="#i-arrow"/></svg></a>`;
     return `<article class="${cls}" aria-label="Епизод ${ep.id}${isNext ? ', следващ' : ''}">` +
       `<div class="ep-art"><img src="/img/ep-${ep.id}.webp" width="800" height="450" alt="Постер на епизод ${ep.id}: ${esc(ep.question)}" loading="lazy" decoding="async"></div>${badge}` +
@@ -588,7 +596,7 @@ ${EPISODES.length} епизода, всяка събота от ${SEASON.time}, 
 ${next ? `Следващ епизод: ${next.id} · ${fullDate(next.date)} · „${next.question}“.` : 'Сезонът приключи.'}
 
 ### Епизоди
-${EPISODES.map((e) => `${e.id}. ${fullDate(e.date)}: „${e.question}“. Води: ${e.host}.${e.final ? ' ' + e.final + '.' : ''}`).join('\n')}
+${EPISODES.map((e) => `${e.id}. ${fullDate(e.date)}: „${e.question}“. Води: ${e.host}.${e.final ? ' ' + e.final + '.' : ''}${e.video ? ' Видео: https://www.youtube.com/watch?v=' + e.video.id : ''}`).join('\n')}
 
 ## Как протича една вечер
 1. Да · Не · Може би: водещият поставя 5 провокативни твърдения, по които всеки изразява позицията си с интерактивни карти (Да, Не, Може би, Коментар).

@@ -86,7 +86,7 @@ function boot(EPISODES) {
   list.innerHTML = EPISODES.map(function (ep, i) {
     var isNext = next && ep.id === next.id, isPast = ep.date < today;
     var cls = 'ep' + (isNext ? ' is-next' : '') + (isPast ? ' is-past' : '');
-    var badge = isNext ? '<span class="ep-badge">Следващ</span>' : isPast ? '<span class="ep-badge">Минал</span>' : '';
+    var badge = ep.video ? '<a class="ep-badge ep-watch" href="#gledai" data-watch="1">Гледай</a>' : isNext ? '<span class="ep-badge">Следващ</span>' : isPast ? '<span class="ep-badge">Минал</span>' : '';
     var action = isPast
       ? ''
       : '<a class="ep-go" href="#zapishi" data-ep-pick="' + ep.id + '" aria-label="Запази място за епизод ' + ep.id + '"><svg aria-hidden="true"><use href="#i-arrow"/></svg></a>';
@@ -96,6 +96,20 @@ function boot(EPISODES) {
       '<h3>' + ep.question + (ep.final ? '<span class="ep-final">' + ep.final + '</span>' : '') + '</h3>' +
       '<div class="ep-foot"><span class="ep-date"><b>' + dm(ep.date) + ', събота</b>' + (ep.id === 7 ? 'Мирослав Милков, Стоян Петков' : ep.host) + '</span>' + action + '</div></div></article>';
   }).join('');
+
+  // Видео: показва се само ако епизодът има запис; YouTube се зарежда едва след клик (nocookie, без проследяване преди това)
+  var vid = EPISODES.find(function (e) { return e.video; });
+  if (vid) {
+    var box = document.getElementById('video');
+    document.getElementById('video-play').addEventListener('click', function () {
+      var f = document.createElement('iframe');
+      f.src = 'https://www.youtube-nocookie.com/embed/' + vid.video.id + '?autoplay=1&rel=0';
+      f.title = 'Епизод ' + vid.id + ': ' + vid.question;
+      f.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen';
+      f.allowFullscreen = true; f.referrerPolicy = 'strict-origin-when-cross-origin';
+      box.innerHTML = ''; box.classList.add('is-playing'); box.appendChild(f); f.focus();
+    });
+  }
 
   // Bring the next episode into view inside the row
   if (next) {

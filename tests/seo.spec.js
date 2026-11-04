@@ -2,6 +2,7 @@
 const { test, expect } = require('@playwright/test');
 
 const SITE = 'https://bibliatapodlupa.com';
+const { nextEpisode } = require('../src/episodes');
 
 async function ldGraph(request) {
   const html = await (await request.get('/')).text();
@@ -20,7 +21,8 @@ test('raw HTML (no JavaScript) already contains the programme, next episode and 
   for (const q of ['Иска ли Бог зли хора в небето?', 'Какво наистина ядосва Бог?', 'Защо Исус трябваше да умре?', 'Ами ако сме грешали за Бог?']) {
     expect(html).toContain(q);
   }
-  expect(html).toMatch(/<p class="when-topic" id="when-topic">Иска ли Бог зли хора в небето\?<\/p>/);
+  const nextQ = (nextEpisode() || { question: 'Иска ли Бог зли хора в небето?' }).question;
+  expect(html).toContain(`<p class="when-topic" id="when-topic">${nextQ}</p>`);
   // FAQ с ключовите думи
   expect((html.match(/<details class="qa-item">/g) || []).length).toBe(9);
   for (const kw of ['библейски разговори', 'трудните въпроси за Бог', 'интерактивно библейско преживяване', 'изучаване на Библията', 'в София', 'съмнения', 'безплатен']) {
