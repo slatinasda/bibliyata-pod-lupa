@@ -598,13 +598,12 @@ legend + * { clear: both; }
 .lg-updated { margin: 24px 0 0; color: var(--ink-2); font-size: .95rem; }
 @media (max-width: 559px) { .lg-table table, .lg-table thead, .lg-table tbody, .lg-table tr, .lg-table th, .lg-table td { display: block; } .lg-table thead { display: none; } .lg-table td { border: 0; padding: 4px 0; } .lg-table tr { padding: 8px 0; border-bottom: 1px solid var(--line); } }
 
-/* Видео от епизод: бутон върху картата, бутон в hero и прозорец */
+/* Видео от епизод: червен play бутон (като в YouTube) на мястото на премахнатия текст върху корицата */
 .ep-art { position: relative; }
-.ep-play { position: absolute; inset: 0; width: 100%; border: 0; padding: 0; cursor: pointer; display: grid; place-items: center; background: rgba(20,58,64,.22); }
-.ep-play { background: rgba(20,58,64,.18); }
-.ep-play svg { width: 58px; height: 58px; padding: 15px 12px 15px 19px; box-sizing: border-box; border-radius: 50%; background: var(--cta); color: #fff; box-shadow: 0 8px 22px -6px rgba(0,0,0,.55); transition: transform .2s ease, background .2s ease; }
-.ep-play:hover svg { background: var(--cta-hover); transform: scale(1.08); }
-.ep-play:focus-visible { outline: 3px solid #F5A33C; outline-offset: -6px; }
+.ep-play, .player-play { position: absolute; inset: 0; width: 100%; border: 0; padding: 0; cursor: pointer; background: transparent; color: #F00; }
+.ep-play svg, .player-play svg { position: absolute; left: 29%; top: 58%; width: clamp(54px, 11%, 100px); height: auto; aspect-ratio: 68 / 48; transform: translate(-50%, -50%); filter: drop-shadow(0 6px 14px rgba(0,0,0,.35)); transition: transform .2s ease, color .2s ease; }
+.ep-play:hover svg, .player-play:hover svg { color: #C00; transform: translate(-50%, -50%) scale(1.08); }
+.ep-play:focus-visible, .player-play:focus-visible { outline: 3px solid #F5A33C; outline-offset: -6px; }
 .btn-watch { display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 22px; border-radius: 999px; border: 2px solid var(--cta); background: transparent; color: var(--cta-hover); font: 700 1rem var(--f-body); cursor: pointer; }
 .btn-watch svg { width: 22px; height: 22px; flex: none; }
 .btn-watch:hover { background: var(--cta); color: #fff; }
@@ -619,8 +618,4 @@ legend + * { clear: both; }
 /* Плейър в страницата */
 .player { position: relative; aspect-ratio: 16 / 9; margin-top: clamp(20px, 3vw, 32px); border-radius: 16px; overflow: hidden; background: #000; box-shadow: 0 26px 48px -28px rgba(24,38,31,.8); }
 .player img, .player iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; object-fit: cover; }
-.player-play { position: absolute; inset: 0; width: 100%; border: 0; padding: 0; cursor: pointer; display: grid; place-items: center; background: linear-gradient(rgba(20,58,64,0), rgba(20,58,64,.28)); }
-.player-play svg { width: clamp(68px, 8vw, 92px); height: clamp(68px, 8vw, 92px); padding: 22px 18px 22px 27px; box-sizing: border-box; border-radius: 50%; background: var(--cta); color: #fff; box-shadow: 0 10px 28px -6px rgba(0,0,0,.6); transition: transform .2s ease, background .2s ease; }
-.player-play:hover svg { background: var(--cta-hover); transform: scale(1.08); }
-.player-play:focus-visible { outline: 3px solid #F5A33C; outline-offset: -8px; }
 .yt-link { white-space: nowrap; font-weight: 600; }
