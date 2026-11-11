@@ -1,5 +1,6 @@
 // Видео от Епизод 1: бутон върху картата и в hero отварят прозорец; YouTube не се зарежда преди клик.
 const { test, expect } = require('@playwright/test');
+const { EPISODES, sofiaToday } = require('../src/episodes');
 
 const ID = 'IQavpKMwNb0'; // видеото в hero и в голямия плейър (Епизод 2)
 
@@ -14,8 +15,15 @@ for (const [name, viewport] of [['desktop', { width: 1440, height: 900 }], ['mob
       await expect(page.locator('#ep-list .ep-play')).toHaveCount(2);
       expect(yt).toEqual([]);
 
-      // редът с епизоди не е скролнат автоматично (предишните се виждат отляво)
-      expect(await page.evaluate(() => document.getElementById('ep-list').scrollLeft)).toBeLessThanOrEqual(8);
+      // десктоп: редът не е скролнат (предишните се виждат отляво); мобилно: отляво е текущият (последният минал) епизод
+      const left = await page.evaluate(() => { const l = document.getElementById('ep-list'); const r = l.getBoundingClientRect(); const c = [...l.children].find((el) => el.getBoundingClientRect().right > r.left + 20); return { scrollLeft: l.scrollLeft, no: c && c.querySelector('.ep-no').textContent }; });
+      if (viewport.width < 640) {
+        const past = EPISODES.filter((e) => e.date < sofiaToday());
+        const cur = past[past.length - 1];
+        if (cur) expect(left.no).toContain(String(cur.id).padStart(2, '0'));
+      } else {
+        expect(left.scrollLeft).toBeLessThanOrEqual(8);
+      }
 
       // карта на епизода
       await page.locator('#ep-list .ep-play').nth(1).scrollIntoViewIfNeeded();
