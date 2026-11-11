@@ -102,6 +102,7 @@ test('registering with an email and with a phone is stored and shown in the admi
   // „Запиши още някого“ връща празна форма; втори запис с телефон.
   await page.click('#reg-again');
   await expect(page.locator('#reg-form')).toBeVisible();
+  await page.selectOption('#r-ep', '4'); // не зависи от датата: следващият епизод се сменя с времето
   await page.fill('#r-name', 'Елена Георгиева');
   await page.fill('#r-contact', '0888 123 456');
   await page.locator('#reg-form button[type=submit]').click();

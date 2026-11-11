@@ -605,9 +605,9 @@ legend + * { clear: both; }
 .ep-play:hover svg, .player-play:hover svg { color: #C00; transform: translate(-50%, -50%) scale(1.08); }
 .ep-play:focus-visible, .player-play:focus-visible { outline: 3px solid #F5A33C; outline-offset: -6px; }
 .cta-more { display: flex; align-items: center; gap: 12px; flex-wrap: nowrap; }
-.btn-watch { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px 0 14px; white-space: nowrap; border-radius: 999px; border: 2px solid #000; background: var(--cta); color: #000; font: 700 1rem var(--f-body); cursor: pointer; }
+.btn-watch { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px 0 14px; white-space: nowrap; border-radius: 999px; border: 2px solid #000; background: #CF4638; color: #000; font: 700 1rem var(--f-body); cursor: pointer; }
 .btn-watch svg { width: 20px; height: 20px; flex: none; }
-.btn-watch:hover { background: var(--cta-hover); color: #000; }
+.btn-watch:hover { background: #B83A2D; color: #000; }
 .vdlg { width: min(960px, 94vw); max-width: none; padding: 0; border: 0; border-radius: 14px; background: #000; overflow: visible; }
 .vdlg::backdrop { background: rgba(12,24,22,.82); }
 .vframe { aspect-ratio: 16 / 9; width: 100%; border-radius: 14px; overflow: hidden; }

@@ -10,7 +10,7 @@ const SEASON = {
 
 const EPISODES = [
   { id: 1, date: '2026-10-31', host: 'Мирослав Милков', question: 'Иска ли Бог зли хора в небето?', video: { id: 'mIWeVg2PYOk', uploaded: '2026-11-04', duration: 'PT37M16S' } },
-  { id: 2, date: '2026-11-07', host: 'Мирослав Милков', question: 'Какво наистина ядосва Бог?' },
+  { id: 2, date: '2026-11-07', host: 'Мирослав Милков', question: 'Какво наистина ядосва Бог?', video: { id: 'IQavpKMwNb0', uploaded: '2026-11-10', duration: 'PT51M42S' } },
   { id: 3, date: '2026-11-14', host: 'Мирослав Милков', question: 'Кога Бог се отказва от теб?' },
   { id: 4, date: '2026-11-21', host: 'Стоян Петков', question: 'Как ни изпитва Бог?' },
   { id: 5, date: '2026-11-28', host: 'Михаил Гърков', question: 'Кой е непростимият грях?' },

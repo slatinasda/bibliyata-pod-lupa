@@ -1,7 +1,7 @@
 // Видео от Епизод 1: бутон върху картата и в hero отварят прозорец; YouTube не се зарежда преди клик.
 const { test, expect } = require('@playwright/test');
 
-const ID = 'mIWeVg2PYOk';
+const ID = 'IQavpKMwNb0'; // видеото в hero и в голямия плейър (Епизод 2)
 
 for (const [name, viewport] of [['desktop', { width: 1440, height: 900 }], ['mobile', { width: 390, height: 844 }]]) {
   test.describe(name, () => {
@@ -11,12 +11,12 @@ for (const [name, viewport] of [['desktop', { width: 1440, height: 900 }], ['mob
       const yt = [];
       page.on('request', (r) => { if (/youtube|ytimg|googlevideo/.test(r.url())) yt.push(r.url()); });
       await page.goto('/');
-      await expect(page.locator('#ep-list .ep-play')).toHaveCount(1);
+      await expect(page.locator('#ep-list .ep-play')).toHaveCount(2);
       expect(yt).toEqual([]);
 
       // карта на епизода
-      await page.locator('#ep-list .ep-play').scrollIntoViewIfNeeded();
-      await page.locator('#ep-list .ep-play').click();
+      await page.locator('#ep-list .ep-play').nth(1).scrollIntoViewIfNeeded();
+      await page.locator('#ep-list .ep-play').nth(1).click();
       const dlg = page.locator('#vdlg');
       await expect(dlg).toBeVisible();
       await expect(dlg.locator('iframe')).toHaveAttribute('src', new RegExp('youtube-nocookie[.]com/embed/' + ID + '[?]autoplay=1'));
