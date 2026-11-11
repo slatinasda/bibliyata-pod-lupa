@@ -128,11 +128,7 @@ function boot(EPISODES) {
   dlg.addEventListener('click', function (e) { if (e.target === dlg) closeVideo(); });
   dlg.addEventListener('close', function () { frame.innerHTML = ''; });
 
-  // Bring the next episode into view inside the row
-  if (next) {
-    var nextEl = list.children[next.id - 1];
-    if (nextEl && next.id > 2) list.scrollLeft = nextEl.offsetLeft - list.offsetLeft - 8;
-  }
+  // Редът с епизоди не се скролва автоматично: отляво се виждат предишните епизоди, следващият е в кадър
   document.querySelectorAll('.arrow').forEach(function (b) {
     b.addEventListener('click', function () {
       list.scrollBy({ left: Number(b.dataset.dir) * (list.clientWidth * 0.8), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });

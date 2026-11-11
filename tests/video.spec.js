@@ -14,6 +14,9 @@ for (const [name, viewport] of [['desktop', { width: 1440, height: 900 }], ['mob
       await expect(page.locator('#ep-list .ep-play')).toHaveCount(2);
       expect(yt).toEqual([]);
 
+      // редът с епизоди не е скролнат автоматично (предишните се виждат отляво)
+      expect(await page.evaluate(() => document.getElementById('ep-list').scrollLeft)).toBeLessThanOrEqual(8);
+
       // карта на епизода
       await page.locator('#ep-list .ep-play').nth(1).scrollIntoViewIfNeeded();
       await page.locator('#ep-list .ep-play').nth(1).click();
